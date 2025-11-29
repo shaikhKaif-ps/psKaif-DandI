@@ -773,7 +773,7 @@ export default function Sidebar({ isExpanded, isDesktop, toggleSidebar }: Sideba
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="shrink-0 flex items-center justify-between p-4 border-b border-gray-200 h-16">
-            <h2 className="text-lg font-bold text-gray-900">D&I Platform M</h2>
+            <h2 className="text-lg font-bold text-gray-900">D&I Platform</h2>
             <button
               onClick={closeMobile}
               className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
