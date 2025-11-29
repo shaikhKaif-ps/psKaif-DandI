@@ -1,0 +1,122 @@
+/* app/globals.css */
+@import 'tailwindcss';
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-inter);
+}
+
+.tertiary-600 {
+  color: #475467;
+}
+
+.tertiary-700 {
+  color: #344054;
+}
+
+.primary-900 {
+  color: #101828;
+}
+
+.brandColor {
+  color: #490000;
+}
+
+.brandBg {
+  background-color: #490000;
+}
+
+.signLeftCon {
+  background-image: url('/signup/signupBanner.png');
+  /* background-size: contain; */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+}
+
+.scrollable-div {
+  scrollbar-width: thin;
+  scrollbar-color: #800000 #f1f1f1;
+}
+
+/* Chrome, Edge, Safari */
+.scrollable-div::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scrollable-div::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  border-radius: 30p;
+}
+
+.scrollable-div::-webkit-scrollbar-thumb {
+  background-color: #800000;
+}
+
+/* 🔥 Hide up/down arrow buttons completely */
+.scrollable-div::-webkit-scrollbar-button {
+  height: 0;
+  width: 0;
+  display: none !important;
+}
+
+/* Also specifically target arrow increment/decrement buttons */
+.scrollable-div::-webkit-scrollbar-button:single-button:vertical:increment,
+.scrollable-div::-webkit-scrollbar-button:single-button:vertical:decrement {
+  display: none;
+  height: 0;
+  width: 0;
+  background: transparent !important;
+}
+
+/* =================================== */
+.input-group {
+  position: relative;
+  margin: 20px 0;
+  /* background-color: red; */
+  width: 100%;
+}
+
+.input-group label {
+  position: absolute;
+  /* width: 100%; */
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #0ef;
+  padding: 0 5px;
+  pointer-events: none;
+  transition: 0.5s;
+}
+
+.input-group input {
+  /* width: 360px; */
+  width: 100%;
+  height: 45px;
+  font-size: 16px;
+  /* color: #fff; */
+  padding: 0px 15px;
+  background: transparent;
+  border: 1.2px solid #0ef;
+  outline: none;
+  border-radius: 5px;
+}
+
+.input-group input:focus ~ label,
+.input-group input:valid ~ label {
+  top: 0;
+  font-size: 14px;
+  /* background: #01003f; */
+  background: #fff;
+}
+
+/* <div className="input-group"><input type="text" required /><label for="text">Username</label></div> */
