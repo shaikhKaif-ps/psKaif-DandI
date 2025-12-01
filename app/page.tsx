@@ -20,6 +20,8 @@ const page = () => {
 
         <h1 className="text-center md:text-left primary-900 md:text-3xl text-2xl font-semibold leading-9 mb-4">
           Select who you are?
+          Select who you are?
+          Select who you are?
         </h1>
 
         <div className="flex gap-3 pb-8">
