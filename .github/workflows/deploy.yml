@@ -1,34 +1,14 @@
-name: Deploy to Hostinger VPS
-
+name: Deploy Frontend to VPS
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
-
+    branches: [main]
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      # Yeh line sabse important hai – lockfile fix + fresh install
-      - name: Clean install & regenerate lockfile if needed
-        run: |
-          rm -f package-lock.json
-          npm install
-          npm run build
-
-      - name: Deploy to Hostinger KVM2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -36,16 +16,39 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            echo "=== Starting Frontend Deployment ==="
+            # Load NVM
+            export NVM_DIR="/home/${{ secrets.SSH_USER }}/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use 20
+            # Ensure PM2 HOME is correct
+            export PM2_HOME="/home/${{ secrets.SSH_USER }}/.pm2"
+            PM2_BIN="$NVM_DIR/versions/node/v20*/bin/pm2"
+            # Configure SSH for GitHub pulls
+            mkdir -p ~/.ssh
+            echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519_deploy
+            chmod 600 ~/.ssh/id_ed25519_deploy
+            cat > ~/.ssh/config << 'EOF'
+            Host github.com
+              HostName github.com
+              User git
+              IdentityFile ~/.ssh/id_ed25519_deploy
+              IdentitiesOnly yes
+              StrictHostKeyChecking no
+            EOF
+            chmod 600 ~/.ssh/config
+            # Go to app directory
             cd ${{ secrets.APP_DIR }}
             echo "Pulling latest code..."
             git reset --hard HEAD
             git pull origin main
-            echo "Installing only production dependencies..."
-            npm ci --omit=dev --ignore-scripts
+            echo "Installing production dependencies..."
+            npm ci --omit=dev
             echo "Building Next.js app..."
             npm run build
-            echo "Restarting with PM2..."
-            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js --update-env
-            pm2 save
-            echo "Deploy completed successfully!"
-            pm2 status
+            echo "Restarting PM2..."
+            $PM2_BIN reload di-web --update-env || $PM2_BIN start ecosystem.config.js
+            $PM2_BIN save
+            echo "Deployment successful!"
+            # Cleanup SSH
+            rm -f ~/.ssh/id_ed25519_deploy ~/.ssh/config

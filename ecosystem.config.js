@@ -2,7 +2,7 @@
 module.exports = {
   apps: [
     {
-      name: 'diversity-inclusion', // ← Yahan apne app ka naam daal do (jaise: dashboard, web, admin, etc.)
+      name: 'di-web', // ← Yahan apne app ka naam daal do (jaise: dashboard, web, admin, etc.)
       script: 'node_modules/next/dist/bin/next', // Next.js ke liye
       args: "start -p 3002", // Next.js production start
       cwd: '/home/emergingfromthecave-di-web-dev/htdocs/di-web-dev.emergingfromthecave.net/D-I-Frontend-PS', // ← Yahan exact wahi path daal do jo tumne secrets.APP_DIR mein daala hai
