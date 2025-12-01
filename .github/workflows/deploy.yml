@@ -18,11 +18,11 @@ jobs:
           script: |
             echo "=== Starting Frontend Deployment ==="
             # Initialize NVM and Node
-            export NVM_DIR="/home/emergingfromthecave-di-api-dev/.nvm"
+            export NVM_DIR="/home/emergingfromthecave-di-web-dev/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 22
             # Ensure PM2 uses correct home
-            export PM2_HOME=/home/emergingfromthecave-di-api-dev/.pm2
+            export PM2_HOME=/home/emergingfromthecave-di-web-dev/.pm2
             PM2_BIN="$NVM_DIR/versions/node/v22.21.1/bin/pm2"
             # Configure SSH for GitHub pulls
             mkdir -p ~/.ssh
