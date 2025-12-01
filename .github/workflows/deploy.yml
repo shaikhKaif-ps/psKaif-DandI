@@ -1,0 +1,54 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:      # Manual trigger bhi enable kar diya
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Full history chahiye git pull ke liye
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        # Agar tumhara project static hai aur build nahi chahiye to upar wali 2 lines comment kar dena
+
+      - name: Deploy to Hostinger KVM2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}   # Yeh wahi key use kar raha hai jo tumne add ki
+          port: 22
+          script: |
+            cd ${{ secrets.APP_DIR }}
+            echo "Pulling latest code..."
+            git pull origin main
+            echo "Installing production dependencies..."
+            npm ci --production
+            echo "Building (if needed)..."
+            npm run build || echo "No build script or already built"
+            echo "Restarting app with PM2..."
+            pm2 restart ecosystem.config.js || pm2 reload ecosystem.config.js || pm2 start npm --name "myapp" -- run start
+            pm2 save
+            pm2 status
+
+      - name: Success Notification (optional)
+        if: success()
+        run: echo "Deploy successful! 🚀"
