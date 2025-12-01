@@ -17,13 +17,13 @@ jobs:
           port: 22
           script: |
             echo "=== Starting Frontend Deployment ==="
-            # Load NVM
-            export NVM_DIR="/home/${{ secrets.SSH_USER }}/.nvm"
+            # Initialize NVM and Node
+            export NVM_DIR="/home/emergingfromthecave-di-api-dev/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 20
-            # Ensure PM2 HOME is correct
-            export PM2_HOME="/home/${{ secrets.SSH_USER }}/.pm2"
-            PM2_BIN="$NVM_DIR/versions/node/v20*/bin/pm2"
+            nvm use 22
+            # Ensure PM2 uses correct home
+            export PM2_HOME=/home/emergingfromthecave-di-api-dev/.pm2
+            PM2_BIN="$NVM_DIR/versions/node/v22.21.1/bin/pm2"
             # Configure SSH for GitHub pulls
             mkdir -p ~/.ssh
             echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519_deploy
