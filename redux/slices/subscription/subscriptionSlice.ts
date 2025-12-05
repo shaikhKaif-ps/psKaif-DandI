@@ -22,6 +22,8 @@ export type SubscriptionApp = {
     PricePerMonth?: number;
     Description?: string;
     IsActive?: boolean;
+    IsChild?: boolean;
+    AssetId?: string;
     CreatedBy?: string;
     createdAt?: string;
     updatedAt?: string;

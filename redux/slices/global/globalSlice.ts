@@ -34,6 +34,9 @@ interface GlobalState {
   stepInfo: StepInfo | null;
   questions: Question[]; // ✅ store all questions
   resultData: ResultData | null; // ✅ Add resultData
+  childAssetId: string | null; // ← Add
+  isChildApp: boolean; // ← Add
+  isChild: boolean; // ← Add
 }
 
 const initialState: GlobalState = {
@@ -43,6 +46,9 @@ const initialState: GlobalState = {
   stepInfo: null,
   questions: [],
   resultData: null,
+  childAssetId: null,
+  isChildApp: false,
+  isChild: false,
 };
 
 const globalSlice = createSlice({
@@ -91,11 +97,21 @@ const globalSlice = createSlice({
       state.resultData = null;
     },
 
+    // Child
+    setChildAssetId: (state, action: PayloadAction<string | null >) => {
+      state.childAssetId = action.payload;
+    },
+    setIsChildApp: (state, action: PayloadAction<boolean>) => {
+      state.isChildApp = action.payload;
+    },
+
     // Optional: Clear both
     clearAll: (state) => {
       state.assetId = null;
       state.assessmentId = null;
       state.categoryIds = [];
+      state.childAssetId = null;
+      state.isChildApp = false;
     },
   },
 });
@@ -111,6 +127,8 @@ export const {
   setResultData,
   clearResultData,
   clearCategoryIds,
+  setChildAssetId,
+  setIsChildApp,
   clearAll,
 } = globalSlice.actions;
 export default globalSlice.reducer;

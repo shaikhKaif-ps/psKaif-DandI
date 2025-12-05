@@ -409,7 +409,7 @@ import {
   useLazyGetAllQuestionByAssetIdQuery,
 } from '@/redux/slices/questions/questionSlice';
 import { setQuestions } from '@/redux/slices/global/globalSlice';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import StartNowQuestions from '@/components/global/StartNowQuestions';
 import toast from 'react-hot-toast';
 import { useLazyGetAssesmentStepsCountQuery } from '@/redux/slices/assesment/assesmentSlice';
@@ -420,40 +420,30 @@ const StartNowPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const params = useParams();
+  const searchParams = useSearchParams();
   const appName = params.app as string;
 
+  // if is child app, get childAssetId from global slice
   const assetId = useSelector((state: RootState) => state.global.assetId);
+  const childAssetId = useSelector((state: RootState) => state.global.childAssetId);
+  const isChild = useSelector((state: RootState) => state.global.isChild);
   const assessmentId = useSelector((state: RootState) => state.global.assessmentId);
+
+  console.log(assetId, "----- startNowpage assetId ---------");
+  console.log(childAssetId, "----- startNowpage childAssetId ---------");
+  console.log(isChild, "----- startNowpage isChild ---------");
+  console.log(assessmentId, "----- startNowpage assessmentId ---------");
+  
 
   const [triggerGetAllQuestions, { isLoading }] = useLazyGetAllQuestionByAssetIdQuery();
   const [triggerGetStepCount] = useLazyGetAssesmentStepsCountQuery();
 
-  // Fetch result if assessment is complete
-  // const { data: resultData, isSuccess: isResultSuccess } = useGetResultByAssessmentIdQuery(
-  //   assessmentId!,
-  //   { skip: !assessmentId || !assessmentId },
-  // );
+
 
   const [currentStep, setCurrentStep] = useState<number | undefined>(undefined);
   const [isAssessmentComplete, setIsAssessmentComplete] = useState(false);
 
-  // Fetch current step on mount if assessmentId exists
-  // useEffect(() => {
-  //   const fetchCurrentStep = async () => {
-  //     if (!assessmentId) return;
-  //     try {
-  //       const stepRes = await triggerGetStepCount(assessmentId).unwrap();
-  //       if (stepRes?.data?.current) {
-  //         setCurrentStep(stepRes.data.current);
-  //       }
-  //     } catch (err) {
-  //       console.warn('Failed to fetch current step count', err);
-  //       setCurrentStep(1); // default to 1
-  //     }
-  //   };
 
-  //   fetchCurrentStep();
-  // }, [assessmentId, triggerGetStepCount]);
   useEffect(() => {
     const fetchCurrentStep = async () => {
       if (!assessmentId) {
@@ -485,14 +475,18 @@ const StartNowPage = () => {
   }, [assessmentId, triggerGetStepCount, appName, router, assetId]);
 
   const handleStart = async () => {
-    if (!assetId) {
-      toast.error('No assetId found!');
+    // Check if we have a child asset ID in URL query params
+    const urlChildAssetId = searchParams.get('childAssetId');
+    const targetAssetId = urlChildAssetId || (isChild ? childAssetId : assetId);
+    
+    if (!targetAssetId) {
+      toast.error('No asset ID found!');
       return;
     }
 
     try {
-      console.log(assetId);
-      const res = await triggerGetAllQuestions(assetId).unwrap();
+      console.log(targetAssetId, urlChildAssetId ? 'URL child asset' : (isChild ? 'child asset' : 'parent asset'));
+      const res = await triggerGetAllQuestions(targetAssetId).unwrap();
 
       if (!res?.data?.length) {
         toast.error('No questions found for this asset.');

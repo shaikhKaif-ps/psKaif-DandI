@@ -2,7 +2,9 @@
 // path: components/dashboard/PageHeading.tsx
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useClearUserAssessmentMutation } from '@/redux/slices/assesment/assesmentSlice';
+import { usePathname, useRouter } from 'next/navigation';
+import { getCookie } from '@/utils/cookies';
 
 import { FaBars } from 'react-icons/fa';
 
@@ -21,71 +23,23 @@ const routeToLabel: Record<string, string> = {
   result: 'Results',
 };
 
+const allowedUserIds = [
+  "69088c7a00c8821643858925",
+  "69315275cd8c3beb46a9ea78",
+  "6931528bcd8c3beb46a9ea7e"
+];
+
 interface PageHeadingProps {
   toggleSidebar?: () => void;
   isDesktop: boolean;
 }
 
-// export default function PageHeading({ toggleSidebar: ___, isDesktop }: PageHeadingProps) {
-//   const pathname = usePathname();
-//   const [_, __] = useState(false);
 
-//   // Extract the main route and sub-route for breadcrumb-like functionality
-//   const pathSegments: string[] = pathname.split('/').filter(Boolean);
-//   const mainRoute: string = pathSegments[0] || 'dashboard';
-//   const subRoute: string | undefined = pathSegments[1];
-
-//   // Get main label
-//   const mainLabel: string = routeToLabel[mainRoute] || 'Dashboard';
-
-//   // Handle mobile menu toggle (for mobile devices only)
-//   const handleMobileMenuToggle = () => {
-//     if (!isDesktop) {
-//       // Trigger mobile sidebar open - we need to communicate this to the parent
-//       // For now, we'll use a custom event
-//       window.dispatchEvent(new CustomEvent('toggleMobileSidebar'));
-//     }
-//   };
-
-//   // Generate breadcrumb or page title
-//   const getPageTitle = (): string => {
-//     if (subRoute && !isNaN(Number(subRoute))) {
-//       return `${mainLabel} - Question ${subRoute}`;
-//     } else if (subRoute) {
-//       const subLabel: string = routeToLabel[subRoute] || subRoute;
-//       return `${mainLabel} - ${subLabel}`;
-//     }
-//     return mainLabel;
-//   };
-
-//   return (
-//     <header className="w-full px-4 py-3 md:px-6 md:py-4 text-white brandBg fixed top-0 z-10 ">
-//       <div className="flex items-center justify-between">
-//         <div className="flex items-center space-x-4">
-//           {/* Mobile Menu Button */}
-//           {!isDesktop && (
-//             <button
-//               onClick={handleMobileMenuToggle}
-//               className="p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors lg:hidden"
-//               aria-label="Open menu"
-//             >
-//               <FaBars className="w-5 h-5" />
-//             </button>
-//           )}
-
-//           {/* Page Title */}
-//           <div className="min-w-0 flex-1">
-//             <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-white truncate">
-//               {getPageTitle()}
-//             </h1>
-//           </div>
-//         </div>
-//       </div>
-//     </header>
-//   );
-// }
 
 export default function PageHeading({ isDesktop }: PageHeadingProps) {
+  const [clearUserAssessment, { isLoading, isSuccess, error }] = useClearUserAssessmentMutation();
+  const router = useRouter();
+
   const pathname = usePathname();
 
   const pathSegments: string[] = pathname.split('/').filter(Boolean);
@@ -110,10 +64,25 @@ export default function PageHeading({ isDesktop }: PageHeadingProps) {
     return mainLabel;
   };
 
+    const handleClear = async () => {
+      try {
+        const userId = getCookie('UserId');
+        if (!userId) {
+          alert('User ID not found in cookies');
+          return;
+        }
+        await clearUserAssessment(userId).unwrap();
+        alert('Assessment cleared successfully!');
+        router.push('/dashboard');
+      } catch (err) {
+        console.error('Failed to clear assessment:', err);
+      }
+    };
+
   return (
     <header className="w-full px-4 py-3 md:px-6 md:py-4 text-white brandBg fixed top-0 z-40 ">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 w-[calc(100%-400px)]">
           {!isDesktop && (
             <button
               onClick={handleMobileMenuToggle}
@@ -124,10 +93,16 @@ export default function PageHeading({ isDesktop }: PageHeadingProps) {
             </button>
           )}
 
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 md:flex items-center justify-between ">
             <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-white truncate">
               {getPageTitle()}
             </h1>
+
+            {allowedUserIds.includes(getCookie('UserId') || '') && (
+              <button onClick={handleClear} className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                Reset User
+              </button>
+            )}
           </div>
         </div>
       </div>

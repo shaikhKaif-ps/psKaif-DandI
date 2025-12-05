@@ -7,7 +7,12 @@ import { useDispatch } from 'react-redux';
 import { setAssessmentId } from '@/redux/slices/global/globalSlice';
 import { useRouter, useParams } from 'next/navigation';
 import { getErrorMessage } from '@/utils/errorHandler';
+// import { useState } from 'react';
+
+
+
 export default function StartCompo({ assetId }: { assetId: string }) {
+  console.log('StartCompo assetId:', assetId);
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams(); // get current slug from [app] route
@@ -25,8 +30,8 @@ export default function StartCompo({ assetId }: { assetId: string }) {
         // 🔥 Save the assessmentId in global slice
         dispatch(setAssessmentId(res.data._id));
 
-        // 🔥 Redirect to currentSlug/startnow
-        router.push(`/dynamicApps/${currentSlug}/startnow`);
+        // 🔥 Redirect to currentSlug/startnow with child asset ID
+        router.push(`/dynamicApps/${currentSlug}/startnow?childAssetId=${assetId}`);
       }
     } catch (err: unknown) {
       console.error('Error creating assessment:', err);
@@ -112,6 +117,13 @@ export default function StartCompo({ assetId }: { assetId: string }) {
             </div>
 
             <div className="w-full flex">
+              
+              {/* <button
+                            onClick={() => setSelectedChildId(null)}
+                            className="mb-6 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                          >
+                            ← Back to Modules
+                          </button> */}
               <button
                 onClick={handleStart}
                 disabled={isLoading}
@@ -126,8 +138,10 @@ export default function StartCompo({ assetId }: { assetId: string }) {
           <div className="flex justify-center">
             <Image
               src={inclusionImage}
+              height={400}
+              width={400}
               alt="Inclusive team illustration"
-              className="w-full max-w-md "
+              // className="w-full max-w-md "
             />
           </div>
         </div>

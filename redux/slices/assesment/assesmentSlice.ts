@@ -108,6 +108,35 @@ export type GetAssessmentAdviceResponse = {
   data: AssessmentAdviceData;
 };
 
+/* ---------- ASSET WITH CHILDREN TYPES ---------- */
+export type AssetChild = {
+  _id: string;
+  Name: string;
+  PricePerMonth: number;
+  Description: string;
+  IsActive: boolean;
+  CreatedBy: string;
+  AssetId?: string; // Parent ID, only present on children
+  IsChild: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+// Structure for the parent asset which contains the Children array
+export type AssetWithChildrenData = AssetChild & {
+  IsChild: false;
+  Children: AssetChild[];
+};
+
+export type GetAssetWithChildrenResponse = {
+  status: boolean;
+  message: string;
+  data: AssetWithChildrenData;
+};
+
+
+
 // ---------- API Slice ----------
 export const assesmentApi = createApi({
   reducerPath: 'assesmentApi',
@@ -155,6 +184,27 @@ export const assesmentApi = createApi({
         method: 'GET',
       }),
     }),
+
+    // Get Asset with Child Assets
+    getAssetWithChildren: builder.query<GetAssetWithChildrenResponse, string>({
+      query: (appId) => ({
+        // Assuming the base URL is handled by fetchBaseQuery and '/assets/child/' is the path
+        url: `/assets/child/${appId}`,
+        method: 'GET',
+      }),
+    }),
+
+    // Clear all assessment data for a user
+    clearUserAssessment: builder.mutation<
+      { status: boolean; message: string; data?: any },
+      string // userId
+    >({
+      query: (userId) => ({
+        url: `/users/clear-assessment/${userId}`,
+        method: 'DELETE', // Change to 'POST' if backend expects POST
+      }),
+    }),
+
   }),
 });
 
@@ -168,4 +218,11 @@ export const {
   // Assessment Advice
   useGetAssessmentAdviceQuery,
   useLazyGetAssessmentAdviceQuery,
+
+  // NEW: Asset with Children Hooks
+  useGetAssetWithChildrenQuery,
+  useLazyGetAssetWithChildrenQuery,
+
+  // Clear User Assessment Mutation Hook
+  useClearUserAssessmentMutation,
 } = assesmentApi;
