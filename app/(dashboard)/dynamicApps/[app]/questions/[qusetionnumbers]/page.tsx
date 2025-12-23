@@ -592,7 +592,7 @@ export default function QuestionPage() {
       {/* Illustration */}
       <div className="flex-1 flex justify-center mt-6 lg:mt-0 w-full">
         <Image
-          src="/inclusion/qusetionsScreenBg.png"
+          src={question.CategoryImage || '/inclusion/qusetionsScreenBg.png'}
           alt="Question Illustration"
           width={330}
           height={330}

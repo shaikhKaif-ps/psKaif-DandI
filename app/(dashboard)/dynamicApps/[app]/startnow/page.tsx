@@ -406,6 +406,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
 import {
   Question,
+  CategoryWithQuestions,
   useLazyGetAllQuestionByAssetIdQuery,
 } from '@/redux/slices/questions/questionSlice';
 import { setQuestions } from '@/redux/slices/global/globalSlice';
@@ -493,7 +494,15 @@ const StartNowPage = () => {
         return;
       }
 
-      const allQuestions: Question[] = res.data.map((q) => ({ ...q }));
+      const allQuestions: Question[] = res.data.flatMap((cat: CategoryWithQuestions) =>
+        cat.questions.map((q) => ({
+          ...q,
+          CategoryId: cat.CategoryId,
+          CategoryName: cat.CategoryName,
+          CategoryImage: cat.CategoryImage,
+          totalQuestion: cat.totalQuestions,
+        })),
+      );
       dispatch(setQuestions(allQuestions));
 
       // Decide where to go

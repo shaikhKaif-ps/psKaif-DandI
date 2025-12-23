@@ -12,20 +12,27 @@ export type Question = {
   Options: number[];
   totalQuestion: number;
   questionNo: number;
+  CategoryImage?: string; // ✅ Added CategoryImage
 };
 
 export type CategoryWithQuestions = {
-  Category: {
+  CategoryId: string;
+  CategoryName: string;
+  CategoryImage: string;
+  totalQuestions: number;
+  questions: {
     _id: string;
-    Name: string;
-  };
-  Questions: Question[];
+    questionNo: number;
+    Question: string;
+    Options: number[];
+    SubcategoryId: string | null;
+  }[];
 };
 
 export type GetQuestionsResponse = {
   status: boolean;
   message: string;
-  data: Question[];
+  data: CategoryWithQuestions[];
 };
 
 export type QuestionByCategoryResponse = {
