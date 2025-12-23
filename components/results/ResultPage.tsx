@@ -1319,10 +1319,10 @@ export default function ResultPage() {
           {/* Chart */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 pt-6 md:p-6 flex-1 flex flex-col items-center">
             <h3 className="text-xl font-semibold text-gray-800 mb-0 text-center">
-              {(resultData as any)?.isChild ? 'SWOT Quadrant' : 'D&I Assessment Radar'}
+              {resultData.isChild ? 'SWOT Quadrant' : 'D&I Assessment Radar'}
             </h3>
             <div className="w-full aspect-square max-w-full flex-1">
-              {(resultData as any)?.isChild ? (
+              {resultData.isChild ? (
                 <QuadrantChart categories={resultData.CategoryScores} />
               ) : (
                 <canvas ref={chartRef} className="w-full h-full" />

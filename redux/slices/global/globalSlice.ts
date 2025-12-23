@@ -21,10 +21,21 @@ export interface CategoryScore {
 }
 
 export interface ResultData {
+  AssessmentId: string;
+  UserId: string;
+  AssetId: string;
   TotalScore: number;
   MaxScore: number;
   Percentage: number;
+  AdviceMessage: string;
+  RecommendedCourseId: string | null;
   CategoryScores: CategoryScore[];
+  CompletedAt: string;
+  isChild?: boolean;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 interface GlobalState {

@@ -37,7 +37,8 @@ interface PageHeadingProps {
 
 
 export default function PageHeading({ isDesktop }: PageHeadingProps) {
-  const [clearUserAssessment, { isLoading, isSuccess, error }] = useClearUserAssessmentMutation();
+  // const [clearUserAssessment, { isLoading, isSuccess, error }] = useClearUserAssessmentMutation();
+  const [clearUserAssessment] = useClearUserAssessmentMutation();
   const router = useRouter();
 
   const pathname = usePathname();

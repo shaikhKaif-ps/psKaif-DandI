@@ -24,6 +24,7 @@ export interface ResultData {
   RecommendedCourseId: string | null;
   CategoryScores: CategoryScore[];
   CompletedAt: string;
+  isChild?: boolean;
   _id: string;
   createdAt: string;
   updatedAt: string;

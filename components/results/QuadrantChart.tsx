@@ -45,8 +45,16 @@ export default function QuadrantChart({ categories }: QuadrantChartProps) {
       threat: { xMin: 0, xMax: innerWidth / 2, yMin: innerHeight / 2, yMax: innerHeight },
       weakness: { xMin: innerWidth / 2, xMax: innerWidth, yMin: innerHeight / 2, yMax: innerHeight },
     };
+interface QuadrantPoint {
+  name: string;
+  x: number;
+  y: number;
+  quadrant: string;
+  score: number;
+  percentage: number;
+}
 
-    const data: any[] = [];
+const data: QuadrantPoint[] = [];
     Object.entries(quadrantGroups).forEach(([quadrant, cats]) => {
       const bounds = quadrantBounds[quadrant as keyof typeof quadrantBounds];
       const padding = 40;
