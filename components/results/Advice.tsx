@@ -462,12 +462,14 @@ const Advice: React.FC<AdviceProps> = ({ categories: rawData }) => {
   // Transform: recalculate Percentage, keep PercentageLevel as-is
   const categories = useMemo<CategoryDisplay[]>(() => {
     return rawData.map((item) => {
-      const calculatedPct = Math.round((item.Score / item.MaxScore) * 100);
+      const score = item.Score || 0;
+      const maxScore = item.MaxScore || 100;
+      const calculatedPct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
       return {
-        CategoryName: item.CategoryName,
         Percentage: calculatedPct,
-        PercentageLevel: item.PercentageLevel, // Use backend value directly
-        AdviceMessage: item.AdviceMessage,
+        PercentageLevel: item.PercentageLevel || 'Unknown',
+        AdviceMessage: item.AdviceMessage || 'No advice provided.',
+        CategoryName: item?.CategoryName || 'Unknown Category',
       };
     });
   }, [rawData]);
@@ -491,6 +493,7 @@ const Advice: React.FC<AdviceProps> = ({ categories: rawData }) => {
 
   // UI color helpers (based on backend PercentageLevel)
   const getScoreColor = (level: string) => {
+    if (!level) return 'bg-gray-100 text-gray-800';
     const l = level.toLowerCase();
     if (l === 'high') return 'bg-green-100 text-green-800';
     if (l === 'medium') return 'bg-yellow-100 text-yellow-800';
@@ -499,6 +502,7 @@ const Advice: React.FC<AdviceProps> = ({ categories: rawData }) => {
   };
 
   const getPercentageColor = (level: string) => {
+    if (!level) return 'text-gray-800';
     const l = level.toLowerCase();
     if (l === 'high') return 'text-green-800';
     if (l === 'medium') return 'text-yellow-800';
@@ -555,7 +559,7 @@ const Advice: React.FC<AdviceProps> = ({ categories: rawData }) => {
               >
                 {/* Category Name */}
                 <div className="flex-1 text-sm md:text-lg font-medium text-gray-900 capitalize">
-                  {item.CategoryName.replace(/-/g, ' ')}
+                  {item.CategoryName?.replace(/-/g, ' ') || 'N/A'}
                 </div>
 
                 {/* Score Badge (from backend PercentageLevel) */}

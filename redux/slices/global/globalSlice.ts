@@ -31,11 +31,18 @@ export interface ResultData {
   RecommendedCourseId: string | null;
   CategoryScores: CategoryScore[];
   CompletedAt: string;
+  assessmentType?: string;
   isChild?: boolean;
   _id: string;
   createdAt: string;
   updatedAt: string;
   __v: number;
+}
+
+interface CompletedChild {
+  _id: string;
+  Name: string;
+  isCompleted: boolean;
 }
 
 interface GlobalState {
@@ -48,6 +55,8 @@ interface GlobalState {
   childAssetId: string | null; // ← Add
   isChildApp: boolean; // ← Add
   isChild: boolean; // ← Add
+  assessmentType: string | null; // ← Add
+  completedChildren: CompletedChild[]; // ← Add
 }
 
 const initialState: GlobalState = {
@@ -60,6 +69,8 @@ const initialState: GlobalState = {
   childAssetId: null,
   isChildApp: false,
   isChild: false,
+  assessmentType: null,
+  completedChildren: [],
 };
 
 const globalSlice = createSlice({
@@ -109,11 +120,17 @@ const globalSlice = createSlice({
     },
 
     // Child
-    setChildAssetId: (state, action: PayloadAction<string | null >) => {
+    setChildAssetId: (state, action: PayloadAction<string | null>) => {
       state.childAssetId = action.payload;
     },
     setIsChildApp: (state, action: PayloadAction<boolean>) => {
       state.isChildApp = action.payload;
+    },
+    setAssessmentType: (state, action: PayloadAction<string | null>) => {
+      state.assessmentType = action.payload;
+    },
+    setCompletedChildren: (state, action: PayloadAction<CompletedChild[]>) => {
+      state.completedChildren = action.payload;
     },
 
     // Optional: Clear both
@@ -123,6 +140,7 @@ const globalSlice = createSlice({
       state.categoryIds = [];
       state.childAssetId = null;
       state.isChildApp = false;
+      state.completedChildren = [];
     },
   },
 });
@@ -140,6 +158,8 @@ export const {
   clearCategoryIds,
   setChildAssetId,
   setIsChildApp,
+  setAssessmentType,
+  setCompletedChildren,
   clearAll,
 } = globalSlice.actions;
 export default globalSlice.reducer;

@@ -32,9 +32,14 @@ export type GetStepCountResponse = {
   status: boolean;
   message: string;
   data: {
-    current: number;
+    totalCount: number;
+    assessmentType?: string;
     currentCount: number;
     remainingSteps: number;
+    CurrentSteps?: number | null;
+    current?: number; // kept for backward compatibility if needed
+    assetId?: string;
+    childAssetId?: string | null;
   };
 };
 
@@ -135,8 +140,6 @@ export type GetAssetWithChildrenResponse = {
   data: AssetWithChildrenData;
 };
 
-
-
 // ---------- API Slice ----------
 export const assesmentApi = createApi({
   reducerPath: 'assesmentApi',
@@ -151,6 +154,7 @@ export const assesmentApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ['Assesment'],
   endpoints: (builder) => ({
     //  Create / Start Assessment
     createAssesment: builder.mutation<CreateAssesmentResponse, CreateAssesmentRequest>({
@@ -159,6 +163,7 @@ export const assesmentApi = createApi({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Assesment'],
     }),
 
     //  Get Step Count
@@ -167,6 +172,7 @@ export const assesmentApi = createApi({
         url: `/assesmentsteps/step-count/${assessmentId}`,
         method: 'GET',
       }),
+      providesTags: ['Assesment'],
     }),
 
     submitStep: builder.mutation<SubmitStepResponse, SubmitStepRequest>({
@@ -175,6 +181,7 @@ export const assesmentApi = createApi({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Assesment'],
     }),
 
     //  Get Assessment Advice
@@ -183,6 +190,7 @@ export const assesmentApi = createApi({
         url: `/assesmentresult/advice/${assessmentId}`,
         method: 'GET',
       }),
+      providesTags: ['Assesment'],
     }),
 
     // Get Asset with Child Assets
@@ -192,6 +200,7 @@ export const assesmentApi = createApi({
         url: `/assets/child/${appId}`,
         method: 'GET',
       }),
+      providesTags: ['Assesment'],
     }),
 
     // Clear all assessment data for a user
@@ -203,8 +212,8 @@ export const assesmentApi = createApi({
         url: `/users/clear-assessment/${userId}`,
         method: 'DELETE', // Change to 'POST' if backend expects POST
       }),
+      invalidatesTags: ['Assesment'],
     }),
-
   }),
 });
 

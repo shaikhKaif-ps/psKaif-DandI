@@ -46,7 +46,7 @@ export default function SuggestedCourses() {
       <div className="relative flex rounded-full border border-gray-300 bg-gray-100 p-1 mb-6 max-w-fit">
         {/* Moving Highlight */}
         <div
-          className="absolute top-1 bottom-1 rounded-full bg-[#5A0C0C] transition-all duration-300 ease-in-out"
+          className="absolute cursor-pointer top-1 bottom-1 rounded-full bg-[#5A0C0C] transition-all duration-300 ease-in-out"
           style={{
             left: highlightStyle.left,
             width: highlightStyle.width,

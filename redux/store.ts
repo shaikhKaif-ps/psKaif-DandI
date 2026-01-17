@@ -1,3 +1,5 @@
+// redux/store.ts
+
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
@@ -12,6 +14,7 @@ import { assesmentApi } from './slices/assesment/assesmentSlice';
 import { questionApi } from '@/redux/slices/questions/questionSlice';
 import { categoryApi } from '@/redux/slices/category/categorySlice';
 import { resultApi } from '@/redux/slices/result/resultSlice';
+import { swotResultApi } from './slices/result/sowtResultSlice';
 
 import globalReducer from '@/redux/slices/global/globalSlice';
 
@@ -19,7 +22,15 @@ import globalReducer from '@/redux/slices/global/globalSlice';
 const persistConfig = {
   key: 'global',
   storage,
-  whitelist: ['assetId', 'assessmentId', 'categoryIds', 'stepInfo', 'resultData', 'questions'],
+  whitelist: [
+    'assetId',
+    'assessmentId',
+    'categoryIds',
+    'stepInfo',
+    'resultData',
+    'questions',
+    'childAssetId',
+  ],
   // only these keys will be persisted
 };
 
@@ -37,6 +48,7 @@ export const store = configureStore({
     [questionApi.reducerPath]: questionApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
     [resultApi.reducerPath]: resultApi.reducer,
+    [swotResultApi.reducerPath]: swotResultApi.reducer,
 
     global: persistedGlobalReducer,
   },
@@ -56,6 +68,7 @@ export const store = configureStore({
       questionApi.middleware,
       categoryApi.middleware,
       resultApi.middleware,
+      swotResultApi.middleware,
     ),
 });
 

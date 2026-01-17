@@ -460,6 +460,7 @@ export default function QuestionPage() {
 
   const questions = useSelector((state: RootState) => state.global.questions);
   const assessmentId = useSelector((state: RootState) => state.global.assessmentId);
+  const assessmentType = useSelector((state: RootState) => state.global.assessmentType);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
   const questionNumber = Number(pathname.split('/').pop()) || 1;
@@ -512,7 +513,11 @@ export default function QuestionPage() {
           router.push(`/dynamicApps/${appName}/questions/${currentQuestionIndex + 2}`);
         } else {
           toast.success('You have completed all questions!');
-          router.push(`/dynamicApps/${appName}/completed`);
+          if (assessmentType === 'swot') {
+            router.push(`/dynamicApps/${appName}/swot-result`);
+          } else {
+            router.push(`/dynamicApps/${appName}/completed`);
+          }
         }
       } else {
         toast.error('Answer was not saved. Please try again.');
@@ -524,11 +529,13 @@ export default function QuestionPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 lg:flex-row items-center justify-between bg-gradient-to-br from-[#FEFEFE] to-[#F9F9F9] px-4 py-4 md:px-6 md:py-6">
+    <div className=" flex flex-col gap-6 lg:flex-row items-center justify-between bg-gradient-to-br from-[#FEFEFE] to-[#F9F9F9] md:px-4 py-4 md:px-6 md:py-6">
       <div className="flex-1 max-w-xl w-full">
         {/* Question Content */}
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#7F0000] mb-4 md:mb-6 capitalize">
-          {question.CategoryName.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
+          {(question.CategoryName || '')
+            .replace(/-/g, ' ')
+            .replace(/\b\w/g, (char) => char.toUpperCase())}
         </h1>
 
         <p className="text-base md:text-xl lg:text-2xl text-gray-700 mb-6 md:mb-8">
@@ -536,7 +543,7 @@ export default function QuestionPage() {
         </p>
 
         {/* Options */}
-        <div className="flex items-center gap-4 md:gap-6 flex-wrap mb-8 md:mb-10 justify-center md:justify-start">
+        <div className="flex items-center gap-4 md:gap-6 flex-wrap mb-8 md:mb-10 justify-start">
           {question.Options.map((opt: number) => (
             <label
               key={opt}

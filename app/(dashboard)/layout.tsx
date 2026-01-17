@@ -138,6 +138,13 @@ export default function DashboardLayout({ children }: LayoutProps) {
     }
   }, [windowWidth]);
 
+  // 4️⃣ Listen for sidebar close events
+  useEffect(() => {
+    const handleCloseSidebar = () => setIsSidebarExpanded(false);
+    window.addEventListener('closeSidebar', handleCloseSidebar);
+    return () => window.removeEventListener('closeSidebar', handleCloseSidebar);
+  }, []);
+
   const toggleSidebar = () => setIsSidebarExpanded((prev) => !prev);
 
   if (!checked) {

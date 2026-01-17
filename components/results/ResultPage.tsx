@@ -1048,9 +1048,9 @@
 //     </div>
 //   );
 // }
-// ================ 
+// ================
 // ================  06 -DEc
-// ================ 
+// ================
 'use client';
 import { RootState } from '@/redux/store';
 import { useEffect, useMemo, useRef } from 'react';
@@ -1080,8 +1080,13 @@ Chart.register(
 );
 
 import { ResultData, CategoryScore } from '@/redux/slices/global/globalSlice';
+import { SwotCategory } from '@/redux/slices/result/sowtResultSlice';
 
-export default function ResultPage() {
+interface ResultPageProps {
+  swotCategories?: SwotCategory[];
+}
+
+export default function ResultPage({ swotCategories }: ResultPageProps) {
   const resultData = useSelector(
     (state: RootState) => state.global.resultData,
   ) as ResultData | null;
@@ -1147,11 +1152,7 @@ export default function ResultPage() {
   const resultsData = useMemo(() => {
     if (!resultData?.CategoryScores) return [];
     return resultData.CategoryScores.map((item: CategoryScore) => ({
-      // category: item.CategoryName.replace(/-/g, ' '),
-      // value: Math.round(item.Percentage),
-      // level: getRatingLevel(item.Percentage),
-
-      category: item.CategoryName.replace(/-/g, ' '),
+      category: (item.CategoryName || '').replace(/-/g, ' '),
       value: item.Percentage,
       level: getRatingLevel(item.Percentage), // uses 75+, 51–74, 0–50
     }));
@@ -1319,11 +1320,26 @@ export default function ResultPage() {
           {/* Chart */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 pt-6 md:p-6 flex-1 flex flex-col items-center">
             <h3 className="text-xl font-semibold text-gray-800 mb-0 text-center">
-              {resultData.isChild ? 'SWOT Quadrant' : 'D&I Assessment Radar'}
+              {resultData.isChild || resultData.assessmentType === 'swot'
+                ? 'SWOT Quadrant'
+                : 'D&I Assessment Radar'}
             </h3>
             <div className="w-full aspect-square max-w-full flex-1">
-              {resultData.isChild ? (
-                <QuadrantChart categories={resultData.CategoryScores} />
+              {resultData.assessmentType === 'swot' || resultData.isChild ? (
+                <QuadrantChart
+                  categories={
+                    swotCategories
+                      ? swotCategories.map((c) => ({
+                          CategoryName: c.name,
+                          Percentage: (c.averageScore / 5) * 100, // Assuming score is out of 5
+                          QuadrantData: {
+                            averageScore: c.averageScore,
+                            quadrant: c.quadrant,
+                          },
+                        }))
+                      : resultData.CategoryScores
+                  }
+                />
               ) : (
                 <canvas ref={chartRef} className="w-full h-full" />
               )}
@@ -1336,7 +1352,13 @@ export default function ResultPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex-1 flex flex-col">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Category Scores</h3>
             <div className="overflow-y-auto grid gap-5 pr-2" style={{ maxHeight: '100vh' }}>
-              {resultData.CategoryScores.map((item: CategoryScore, index: number) => {
+              {(swotCategories
+                ? swotCategories.map((c) => ({
+                    CategoryName: c.name,
+                    Percentage: (c.averageScore / 5) * 100,
+                  }))
+                : resultData.CategoryScores
+              ).map((item: { CategoryName: string; Percentage: number }, index: number) => {
                 const percentage = Math.round(item.Percentage);
                 const level = getRatingLevel(percentage);
                 const label = getRatingLabel(percentage);
@@ -1348,7 +1370,7 @@ export default function ResultPage() {
                     className="flex flex-col justify-between border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 bg-white"
                   >
                     <span className="text-[16px] font-medium text-gray-500 capitalize mb-4 text-center">
-                      {item.CategoryName.replace(/-/g, ' ')}
+                      {(item.CategoryName || '').replace(/-/g, ' ')}
                     </span>
 
                     {/* Progress Bar */}

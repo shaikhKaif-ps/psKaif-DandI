@@ -14,6 +14,7 @@ const routeToLabel: Record<string, string> = {
   diversity: 'Diversity',
   inclusion: 'Inclusion',
   swot: 'SWOT',
+  'swot-result': 'SWOT',
   equity: 'Equity',
   culture: 'Culture',
   talent: 'Talent',
@@ -24,17 +25,15 @@ const routeToLabel: Record<string, string> = {
 };
 
 const allowedUserIds = [
-  "69088c7a00c8821643858925",
-  "69315275cd8c3beb46a9ea78",
-  "6931528bcd8c3beb46a9ea7e"
+  '69088c7a00c8821643858925',
+  '69315275cd8c3beb46a9ea78',
+  '6931528bcd8c3beb46a9ea7e',
 ];
 
 interface PageHeadingProps {
   toggleSidebar?: () => void;
   isDesktop: boolean;
 }
-
-
 
 export default function PageHeading({ isDesktop }: PageHeadingProps) {
   // const [clearUserAssessment, { isLoading, isSuccess, error }] = useClearUserAssessmentMutation();
@@ -56,29 +55,47 @@ export default function PageHeading({ isDesktop }: PageHeadingProps) {
   };
 
   const getPageTitle = (): string => {
-    if (subRoute && !isNaN(Number(subRoute))) {
-      return `${mainLabel} - Question ${subRoute}`;
-    } else if (subRoute) {
-      const subLabel: string = routeToLabel[subRoute] || subRoute;
+    // Helper to check if string is MongoDB ID
+    const isId = (s: string) => /^[0-9a-fA-F]{24}$/.test(s);
+    const isNumber = (s: string) => !isNaN(Number(s));
+
+    // Filter segments to find meaningful labels (skip IDs and Numbers)
+    const meaningfulSegments = pathSegments.filter((segment) => !isId(segment) && !isNumber(segment));
+
+    // Skip 'dynamicApps' as it's just a path container
+    const labels = meaningfulSegments[0] === 'dynamicApps' ? meaningfulSegments.slice(1) : meaningfulSegments;
+
+    const mainLabel: string = routeToLabel[mainRoute] || 'Dashboard';
+
+    if (labels.length > 0) {
+      const topSegment = labels[0];
+      const subLabel: string =
+        routeToLabel[topSegment] ||
+        topSegment
+          .split('-')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+
       return `${mainLabel} - ${subLabel}`;
     }
+
     return mainLabel;
   };
 
-    const handleClear = async () => {
-      try {
-        const userId = getCookie('UserId');
-        if (!userId) {
-          alert('User ID not found in cookies');
-          return;
-        }
-        await clearUserAssessment(userId).unwrap();
-        alert('Assessment cleared successfully!');
-        router.push('/dashboard');
-      } catch (err) {
-        console.error('Failed to clear assessment:', err);
+  const handleClear = async () => {
+    try {
+      const userId = getCookie('UserId');
+      if (!userId) {
+        alert('User ID not found in cookies');
+        return;
       }
-    };
+      await clearUserAssessment(userId).unwrap();
+      alert('Assessment cleared successfully!');
+      router.push('/dashboard');
+    } catch (err) {
+      console.error('Failed to clear assessment:', err);
+    }
+  };
 
   return (
     <header className="w-full px-4 py-3 md:px-6 md:py-4 text-white brandBg fixed top-0 z-40 ">
@@ -100,7 +117,10 @@ export default function PageHeading({ isDesktop }: PageHeadingProps) {
             </h1>
 
             {allowedUserIds.includes(getCookie('UserId') || '') && (
-              <button onClick={handleClear} className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+              <button
+                onClick={handleClear}
+                className="hidden md:block ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
                 Reset User
               </button>
             )}

@@ -119,4 +119,14 @@ body {
   background: #fff;
 }
 
+/* globals.css */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
 /* <div className="input-group"><input type="text" required /><label for="text">Username</label></div> */

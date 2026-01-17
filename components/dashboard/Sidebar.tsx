@@ -958,7 +958,6 @@
 //      ) || [],
 //    ).values(),
 //  );
-  
 
 //   const handleLogout = () => {
 //     // 1. Delete **all** cookies
@@ -975,7 +974,6 @@
 //       localStorage.clear();
 //     }
 
-    
 //     // 4. Redirect
 //     router.push('/ind-login');
 //   };
@@ -1303,17 +1301,17 @@ function SidebarContent({ isExpanded, onLinkClick, currentPath }: SidebarContent
     equity: {
       baseBg: 'bg-[#9FAF75]', // olive green
       hoverBg: 'hover:bg-[#B4C58A]', // lighter muted
-      text: 'text-gray-900', // dark text for contrast
+      text: 'text-white', // dark text for contrast
     },
     inclusion: {
       baseBg: 'bg-[#6DC7A6]', // mint green
       hoverBg: 'hover:bg-[#84D9B9]', // lighter mint
-      text: 'text-gray-900',
+      text: 'text-white',
     },
     organization: {
       baseBg: 'bg-[#B0B8C5]', // neutral gray-blue
       hoverBg: 'hover:bg-[#C6CFDB]', // light neutral hover
-      text: 'text-gray-900',
+      text: 'text-white',
     },
     swot: {
       baseBg: 'bg-[#4F8885]', // teal
@@ -1323,7 +1321,7 @@ function SidebarContent({ isExpanded, onLinkClick, currentPath }: SidebarContent
     talentdevelopment: {
       baseBg: 'bg-[#56B8C9]', // aqua blue
       hoverBg: 'hover:bg-[#6FD1E2]', // lighter aqua
-      text: 'text-gray-900',
+      text: 'text-white',
     },
     belongings: {
       baseBg: 'bg-[#9B8FBF]', // lavender purple
@@ -1332,59 +1330,57 @@ function SidebarContent({ isExpanded, onLinkClick, currentPath }: SidebarContent
     },
   };
 
-const navItemsFromSubscription: NavItem[] = Array.from(
-  new Map(
-    UserSubcription?.data?.flatMap((sub) =>
-      sub.Apps.filter(
-        (app): app is SubscriptionApp & { AppId: NonNullable<SubscriptionApp['AppId']> } =>
-          app.AppId !== null && app.AppId !== undefined,
-      ).map((app) => {
-        const appId = app.AppId;
-        const rawName = appId.Name;
-        const normalizedName = rawName.toLowerCase().replace(/\s+/g, '');
-        const isChild = appId.IsChild === true;
+  const navItemsFromSubscription: NavItem[] = Array.from(
+    new Map(
+      UserSubcription?.data?.flatMap((sub) =>
+        sub.Apps.filter(
+          (app): app is SubscriptionApp & { AppId: NonNullable<SubscriptionApp['AppId']> } =>
+            app.AppId !== null && app.AppId !== undefined,
+        ).map((app) => {
+          const appId = app.AppId;
+          const rawName = appId.Name;
+          const normalizedName = rawName.toLowerCase().replace(/\s+/g, '');
+          const isChild = appId.IsChild === true;
 
-        // Determine parent ID and slug
-        const parentAssetId = isChild && appId.AssetId ? appId.AssetId : appId._id;
-        console.log(rawName, '---- rawName ----');
-        console.log(normalizedName, '---- normalizedName ----');
-        
-        const parentRawName = isChild
-          ? normalizedName // ← You can improve this later with a map
-          : rawName;
-        const parentSlug = parentRawName.toLowerCase().replace(/\s+/g, '');
-        console.log(parentSlug, '---- parentSlug ----');
+          // Determine parent ID and slug
+          const parentAssetId = isChild && appId.AssetId ? appId.AssetId : appId._id;
+          console.log(rawName, '---- rawName ----');
+          console.log(normalizedName, '---- normalizedName ----');
 
+          const parentRawName = isChild
+            ? normalizedName // ← You can improve this later with a map
+            : rawName;
+          const parentSlug = parentRawName.toLowerCase().replace(/\s+/g, '');
+          console.log(parentSlug, '---- parentSlug ----');
 
-        const href = isChild
-          ? `/dynamicApps/${parentSlug}/${normalizedName}`
-          : `/dynamicApps/${normalizedName}`;
+          const href = isChild
+            ? `/dynamicApps/${parentSlug}/${normalizedName}`
+            : `/dynamicApps/${normalizedName}`;
 
-        const colors = appColors[normalizedName] || {
-          baseBg: 'bg-gray-200',
-          hoverBg: 'hover:bg-gray-300',
-          text: 'text-gray-800',
-        };
+          const colors = appColors[normalizedName] || {
+            baseBg: 'bg-gray-200',
+            hoverBg: 'hover:bg-gray-300',
+            text: 'text-gray-800',
+          };
 
-        return [
-          appId._id,
-          {
-            iconSrc: appIcons[normalizedName] || '/sidebar/defaultIcon.svg',
-            label: rawName + (isChild ? ' ' : ''),
-            href,
-            baseBg: colors.baseBg,
-            hoverBg: colors.hoverBg,
-            text: colors.text,
-            appId: appId._id,
-            parentAssetId,
-            isChild,
-          } as NavItem & { parentAssetId: string; isChild: boolean },
-        ];
-      }),
-    ) || [],
-  ).values(),
-);
-  
+          return [
+            appId._id,
+            {
+              iconSrc: appIcons[normalizedName] || '/sidebar/defaultIcon.svg',
+              label: rawName.replace(/([a-z])([A-Z])/g, '$1 $2'),
+              href,
+              baseBg: colors.baseBg,
+              hoverBg: colors.hoverBg,
+              text: colors.text,
+              appId: appId._id,
+              parentAssetId,
+              isChild,
+            } as NavItem & { parentAssetId: string; isChild: boolean },
+          ];
+        }),
+      ) || [],
+    ).values(),
+  );
 
   const handleLogout = () => {
     // 1. Delete **all** cookies
@@ -1401,7 +1397,6 @@ const navItemsFromSubscription: NavItem[] = Array.from(
       localStorage.clear();
     }
 
-    
     // 4. Redirect
     router.push('/ind-login');
   };
@@ -1461,7 +1456,7 @@ const navItemsFromSubscription: NavItem[] = Array.from(
                   px-4 py-2 rounded-lg cursor-pointer w-full
                   ${item.baseBg} ${item.hoverBg} ${item.text}
                   ${currentPath === item.href ? 'ring-1 ring-offset-1 ring-gray-400' : ''}
-                  hover:shadow-sm active:scale-95 transition-all duration-200`}
+                  hover:shadow-sm active:scale-95 transition-all duration-200 capitalize`}
               >
                 <Image
                   src={item.iconSrc}

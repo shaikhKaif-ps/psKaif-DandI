@@ -219,7 +219,7 @@ const CartPage = () => {
       toast.success('Quantity reduced');
     } catch (err) {
       console.log(err);
-      
+
       // Safe revert: add back 1 with full data
       dispatch(
         addToCart({

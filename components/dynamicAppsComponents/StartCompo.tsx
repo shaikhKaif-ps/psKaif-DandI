@@ -9,8 +9,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { getErrorMessage } from '@/utils/errorHandler';
 // import { useState } from 'react';
 
-
-
 export default function StartCompo({ assetId }: { assetId: string }) {
   console.log('StartCompo assetId:', assetId);
   const dispatch = useDispatch();
@@ -117,7 +115,6 @@ export default function StartCompo({ assetId }: { assetId: string }) {
             </div>
 
             <div className="w-full flex">
-              
               {/* <button
                             onClick={() => setSelectedChildId(null)}
                             className="mb-6 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
