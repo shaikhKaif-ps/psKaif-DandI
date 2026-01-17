@@ -42,7 +42,7 @@ const StartNowPage = () => {
   console.log(assetId, '----- startNowpage assetId ---------');
   console.log(childAssetId, '----- startNowpage childAssetId ---------');
   console.log(isChild, '----- startNowpage isChild ---------');
-  console.log(assessmentId, '----- startNowpage assessmentId ---------');
+  // console.log(assessmentId, '----- startNowpage assessmentId ---------');
 
   const [triggerGetAllQuestions, { isLoading }] = useLazyGetAllQuestionByAssetIdQuery();
   const [triggerGetStepCount] = useLazyGetAssesmentStepsCountQuery();
