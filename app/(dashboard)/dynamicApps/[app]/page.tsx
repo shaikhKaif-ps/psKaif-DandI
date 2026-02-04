@@ -12,6 +12,10 @@ export default function DynamicAppPage() {
   const assetId = useSelector((state: RootState) => state.global.assetId);
   console.log(assetId, '================= DynamicAppPage assetId ===================');
 
-  return <div>{assetId ? <StartCompo assetId={assetId} /> : <p>No asset selected.</p>}</div>;
+  return (
+    <div className="w-full">
+      {assetId ? <StartCompo assetId={assetId} /> : <p>No asset selected.</p>}
+    </div>
+  );
 }
 // ====================

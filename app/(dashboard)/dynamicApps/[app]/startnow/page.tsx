@@ -1,9 +1,6 @@
-
-
 // path : dynamicApps/[app]/startnow
 
 'use client';
-
 
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -55,14 +52,14 @@ const StartNowPage = () => {
   useEffect(() => {
     const fetchCurrentStep = async () => {
       setIsInitializing(true);
-      
+
       // PRIORITY: Check URL for childAssetId first
       const urlChildAssetId = searchParams.get('childAssetId');
       if (urlChildAssetId) {
         console.log('🎯 Setting childAssetId from URL:', urlChildAssetId);
         dispatch(setChildAssetId(urlChildAssetId));
       }
-      
+
       if (!assessmentId) {
         console.log('⚠️ No assessmentId - starting fresh assessment');
         setCurrentStep(1); // New assessment → start from 1
@@ -74,13 +71,13 @@ const StartNowPage = () => {
         const stepRes = await triggerGetStepCount(assessmentId).unwrap();
 
         const data = stepRes?.data;
-        
+
         // CRITICAL: If URL has childAssetId, check if it matches API response
         if (urlChildAssetId && data?.childAssetId && urlChildAssetId !== data.childAssetId) {
           console.log('🔄 Different child asset detected:', {
             urlChildAssetId,
             apiChildAssetId: data.childAssetId,
-            action: 'Starting new assessment'
+            action: 'Starting new assessment',
           });
           // Different child asset - start fresh
           setCurrentStep(1);
@@ -90,7 +87,7 @@ const StartNowPage = () => {
           setIsInitializing(false);
           return;
         }
-        
+
         // Same child or no mismatch - continue with existing assessment
         setAssessmentTypeState(data?.assessmentType);
         dispatch(setAssessmentType(data?.assessmentType || null));
@@ -98,7 +95,7 @@ const StartNowPage = () => {
         if (data?.assetId) {
           dispatch(setAssetId(data.assetId));
         }
-        
+
         // Only set childAssetId from API if NOT provided in URL
         if (data?.childAssetId && !urlChildAssetId) {
           dispatch(setChildAssetId(data.childAssetId));

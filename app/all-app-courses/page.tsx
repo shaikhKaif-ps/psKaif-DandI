@@ -131,12 +131,18 @@ export default function AssetsList() {
                   <div className="pt-6 pb-4 flex items-center justify-center">
                     <button
                       onClick={() => handleSelect(asset)}
-                      disabled={isAdding}
+                      disabled={isAdding || asset.purchased}
                       className={`cursor-pointer text-base font-bold py-2 w-[200px] border border-[#D0D5DD] rounded 
                       ${isSelected ? 'bg-red-500 text-white' : 'text-black'}
-                      ${isAdding ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      ${isAdding || asset.purchased ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      {isSelected ? 'Selected' : isAdding ? 'Adding...' : 'Select'}
+                      {asset.purchased
+                        ? 'All Purchase'
+                        : isSelected
+                          ? 'Selected'
+                          : isAdding
+                            ? 'Adding...'
+                            : 'Select'}
                     </button>
                   </div>
                 </div>

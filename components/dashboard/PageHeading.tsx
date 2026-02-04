@@ -60,10 +60,13 @@ export default function PageHeading({ isDesktop }: PageHeadingProps) {
     const isNumber = (s: string) => !isNaN(Number(s));
 
     // Filter segments to find meaningful labels (skip IDs and Numbers)
-    const meaningfulSegments = pathSegments.filter((segment) => !isId(segment) && !isNumber(segment));
+    const meaningfulSegments = pathSegments.filter(
+      (segment) => !isId(segment) && !isNumber(segment),
+    );
 
     // Skip 'dynamicApps' as it's just a path container
-    const labels = meaningfulSegments[0] === 'dynamicApps' ? meaningfulSegments.slice(1) : meaningfulSegments;
+    const labels =
+      meaningfulSegments[0] === 'dynamicApps' ? meaningfulSegments.slice(1) : meaningfulSegments;
 
     const mainLabel: string = routeToLabel[mainRoute] || 'Dashboard';
 

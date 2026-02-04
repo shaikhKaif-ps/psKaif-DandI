@@ -35,7 +35,7 @@ const StartNowQuestions: React.FC<StartNowQuestionsProps> = ({
         : 'Start Assessment';
 
   return (
-    <div className="max-w-[1068px] mx-auto text-center md:px-4 py-10">
+    <div className="max-w-[1068px] mx-auto text-center md:px-4 py-10 flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-2xl md:text-3xl font-normal text-center">{mainHeading}</h1>
 
       <ul className="text-left max-w-xl mx-auto py-12 space-y-3">

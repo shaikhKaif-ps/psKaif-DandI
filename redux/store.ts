@@ -15,6 +15,7 @@ import { questionApi } from '@/redux/slices/questions/questionSlice';
 import { categoryApi } from '@/redux/slices/category/categorySlice';
 import { resultApi } from '@/redux/slices/result/resultSlice';
 import { swotResultApi } from './slices/result/sowtResultSlice';
+import { cultureApi } from '@/redux/slices/culture/cultureSlice';
 
 import globalReducer from '@/redux/slices/global/globalSlice';
 
@@ -49,6 +50,7 @@ export const store = configureStore({
     [categoryApi.reducerPath]: categoryApi.reducer,
     [resultApi.reducerPath]: resultApi.reducer,
     [swotResultApi.reducerPath]: swotResultApi.reducer,
+    [cultureApi.reducerPath]: cultureApi.reducer,
 
     global: persistedGlobalReducer,
   },
@@ -69,6 +71,7 @@ export const store = configureStore({
       categoryApi.middleware,
       resultApi.middleware,
       swotResultApi.middleware,
+      cultureApi.middleware,
     ),
 });
 

@@ -734,16 +734,24 @@
 'use client';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from 'react';
-import { GoArrowUpRight } from "react-icons/go";
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { GoArrowUpRight } from 'react-icons/go';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { RootState } from '@/redux/store';
 import {
   useGetSwotCategoriesByChildAssetQuery,
   SwotCategory,
 } from '@/redux/slices/result/sowtResultSlice';
-import { useGetAssetWithChildrenQuery, useCreateAssesmentMutation } from '@/redux/slices/assesment/assesmentSlice';
-import { setCompletedChildren, setChildAssetId, clearAssessmentId, setAssessmentId } from '@/redux/slices/global/globalSlice';
+import {
+  useGetAssetWithChildrenQuery,
+  useCreateAssesmentMutation,
+} from '@/redux/slices/assesment/assesmentSlice';
+import {
+  setCompletedChildren,
+  setChildAssetId,
+  clearAssessmentId,
+  setAssessmentId,
+} from '@/redux/slices/global/globalSlice';
 
 interface Child {
   _id: string;
@@ -805,12 +813,26 @@ export default function SwotResultPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const assetId = useSelector((state: RootState) => state.global.assetId);
   const childAssetId = useSelector((state: RootState) => state.global.childAssetId);
   const completedChildren = useSelector((state: RootState) => state.global.completedChildren);
-
+  const searchParams = useSearchParams();
   const [createAssesment] = useCreateAssesmentMutation();
+
+  // ✅ Sync childAssetId from URL to Redux on mount or when URL changes
+  useEffect(() => {
+    const urlChildAssetId = searchParams.get('childAssetId');
+    if (urlChildAssetId !== undefined) {
+      // If param is present, sync it. If it's missing, it might mean 'ALL' (null)
+      // but we only sync if it's explicitly different to avoid loops if needed.
+      // However, usually it's better to trust the URL.
+      if (urlChildAssetId !== childAssetId) {
+        dispatch(setChildAssetId(urlChildAssetId));
+      }
+    }
+  }, [searchParams, dispatch, childAssetId]);
 
   const isAllMode = childAssetId === null;
 
@@ -826,8 +848,21 @@ export default function SwotResultPage() {
   // Get ALL children (not just completed) for START NOW buttons
   const allChildren = childrenData?.data?.Children || [];
 
-  console.log(childrenData, " ==== childrenData ========  ");
-  console.log(allChildren, " ==== allChildren ========  ");
+  console.log(childrenData, ' ==== childrenData ========  ');
+  console.log(allChildren, ' ==== allChildren ========  ');
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isDropdownOpen && !target.closest('.mobile-filter-dropdown')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('closeSidebar'));
@@ -860,14 +895,14 @@ export default function SwotResultPage() {
     },
   );
 
-  console.log(data, "======= useGetSwotCategoriesByChildAssetQuery ====");
+  console.log(data, '======= useGetSwotCategoriesByChildAssetQuery ====');
 
   // const categories = data?.data?.categories || [];
   const normalizedItems: SwotCategory[] = (() => {
     if (!data?.data) return [];
 
     // =====================
-    // ALL MODE (childAssets)
+    // ALL MODE (childAssets) {/* FILTER PANEL */}
     // =====================
     if (isAllMode && 'childAssets' in data.data) {
       return (data.data.childAssets as ChildAsset[]).flatMap((child: ChildAsset) => {
@@ -895,7 +930,6 @@ export default function SwotResultPage() {
     return [];
   })();
 
-
   const groupedData = {
     strength: normalizedItems.filter((c) => c.quadrant === 'strength'),
     weakness: normalizedItems.filter((c) => c.quadrant === 'weakness'),
@@ -907,22 +941,134 @@ export default function SwotResultPage() {
     return <div className="p-10 text-center">Loading...</div>;
   }
 
+  // Get current active filter name for mobile dropdown
+  const currentFilterName = (() => {
+    if (childAssetId === null) return 'ALL';
+    const matchedChild = completedChildren.find((child) => child._id === childAssetId);
+    return matchedChild?.Name?.toUpperCase() || 'ALL';
+  })();
+
   return (
-    <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50 py-[90px] md:pl-6 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[#5A0C0C]">SWOT Analysis</h1>
+
+        {/* Mobile Filter Dropdown */}
+        <div className="md:hidden relative mobile-filter-dropdown">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EAECF0] rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <span>{currentFilterName}</span>
+            <svg
+              className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-[#EAECF0] rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+              {PARENT_CATEGORIES.map((cat) => {
+                const upper = cat.trim().toUpperCase();
+                const matchedChild = completedChildren.find(
+                  (child) =>
+                    String(child.Name || '')
+                      .trim()
+                      .toUpperCase()
+                      .localeCompare(upper, undefined, { sensitivity: 'base' }) === 0,
+                );
+                const exists = cat === 'ALL' || !!matchedChild;
+                const isActive =
+                  (cat === 'ALL' && childAssetId === null) ||
+                  (cat !== 'ALL' && childAssetId === matchedChild?._id);
+
+                if (exists) {
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        const selectedChildAssetId = cat === 'ALL' ? null : matchedChild!._id;
+                        dispatch(setChildAssetId(selectedChildAssetId));
+                        const params = new URLSearchParams(searchParams.toString());
+                        if (selectedChildAssetId) {
+                          params.set('childAssetId', selectedChildAssetId);
+                        } else {
+                          params.delete('childAssetId');
+                        }
+                        router.replace(`?${params.toString()}`);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
+                        isActive ? 'bg-[#5A0C0C] text-white hover:bg-[#8A1C1C]' : 'text-gray-700'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={cat}
+                    onClick={async () => {
+                      const foundChild = allChildren.find(
+                        (child: Child) =>
+                          String(child.Name || '')
+                            .trim()
+                            .toUpperCase()
+                            .localeCompare(cat.trim().toUpperCase(), undefined, {
+                              sensitivity: 'base',
+                            }) === 0,
+                      );
+                      const selectedChildAssetId = foundChild?._id || '';
+
+                      try {
+                        const res = await createAssesment({
+                          AssetId: selectedChildAssetId,
+                        }).unwrap();
+                        if (res?.data?._id) {
+                          dispatch(setAssessmentId(res.data._id));
+                          dispatch(setChildAssetId(selectedChildAssetId));
+                          router.push(
+                            `/dynamicApps/${params.app}/startnow?childAssetId=${selectedChildAssetId}`,
+                          );
+                        }
+                      } catch (err) {
+                        console.error('Failed to create assessment:', err);
+                      }
+                      setIsDropdownOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                  >
+                    {cat} <span className="text-xs">(Start Now)</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex gap-1">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-1">
         {/* SWOT CARDS */}
-        <div className="flex flex-wrap flex-1 gap-[1px]">
+        <div className="flex flex-wrap flex-1 gap-[1px] w-full">
           <Quadrant type="strength" items={groupedData.strength} isAllMode={isAllMode} />
           <Quadrant type="weakness" items={groupedData.weakness} isAllMode={isAllMode} />
           <Quadrant type="opportunity" items={groupedData.opportunity} isAllMode={isAllMode} />
           <Quadrant type="threat" items={groupedData.threat} isAllMode={isAllMode} />
         </div>
 
-        <div className="w-40 bg-white border h-fit border-[#EAECF0] shadow shrink-0">
+        {/* Desktop Filter Panel - Hidden on mobile */}
+        <div className="hidden md:block w-40 bg-white border h-fit border-[#EAECF0] shadow shrink-0">
           {PARENT_CATEGORIES.map((cat) => {
             const upper = cat.trim().toUpperCase();
 
@@ -935,7 +1081,9 @@ export default function SwotResultPage() {
             );
 
             const exists = cat === 'ALL' || !!matchedChild;
-            const isActive = (cat === 'ALL' && childAssetId === null) || (cat !== 'ALL' && childAssetId === matchedChild?._id);
+            const isActive =
+              (cat === 'ALL' && childAssetId === null) ||
+              (cat !== 'ALL' && childAssetId === matchedChild?._id);
 
             if (exists) {
               return (
@@ -944,6 +1092,14 @@ export default function SwotResultPage() {
                     onClick={() => {
                       const selectedChildAssetId = cat === 'ALL' ? null : matchedChild!._id;
                       dispatch(setChildAssetId(selectedChildAssetId));
+                      // ✅ Update URL params
+                      const params = new URLSearchParams(searchParams.toString());
+                      if (selectedChildAssetId) {
+                        params.set('childAssetId', selectedChildAssetId);
+                      } else {
+                        params.delete('childAssetId');
+                      }
+                      router.replace(`?${params.toString()}`);
                     }}
                     className={`
                       cursor-pointer relative overflow-hidden w-full  text-sm h-[54.5px] group text-left
@@ -960,7 +1116,8 @@ export default function SwotResultPage() {
                       ${isActive ? 'bg-[#8A1C1C]' : 'bg-[#5A0C0C]'}
                     `}
                     >
-                      {cat === 'ALL' ? 'VIEW ALL' : 'VIEW RESULT'} <GoArrowUpRight className="text-2xl ml-1" />
+                      {cat === 'ALL' ? 'VIEW ALL' : 'VIEW RESULT'}{' '}
+                      <GoArrowUpRight className="text-2xl ml-1" />
                     </span>
                   </button>
                 </div>
@@ -976,7 +1133,9 @@ export default function SwotResultPage() {
                         String(child.Name || '')
                           .trim()
                           .toUpperCase()
-                          .localeCompare(cat.trim().toUpperCase(), undefined, { sensitivity: 'base' }) === 0,
+                          .localeCompare(cat.trim().toUpperCase(), undefined, {
+                            sensitivity: 'base',
+                          }) === 0,
                     );
                     const selectedChildAssetId = foundChild?._id || '';
 
@@ -985,7 +1144,9 @@ export default function SwotResultPage() {
                       if (res?.data?._id) {
                         dispatch(setAssessmentId(res.data._id));
                         dispatch(setChildAssetId(selectedChildAssetId));
-                        router.push(`/dynamicApps/${params.app}/startnow?childAssetId=${selectedChildAssetId}`);
+                        router.push(
+                          `/dynamicApps/${params.app}/startnow?childAssetId=${selectedChildAssetId}`,
+                        );
                       }
                     } catch (err) {
                       console.error('Failed to create assessment:', err);
@@ -1060,50 +1221,56 @@ function Quadrant({
         {config.title}
       </h2>
 
-      <div className="flex  flex-wrap gap-2 overflow-y-auto px-5 pt-4 pb-5 no-scrollbar justify-between">
+      <div className="flex flex-wrap gap-2 overflow-y-auto px-3 md:px-5 pt-4 pb-5 no-scrollbar justify-between">
         {items.length > 0 ? (
-          items.filter((item) => item.averageScore > 0).map((item) => (
+          items
+            .filter((item) => item.averageScore > 0)
+            .map((item) => (
+              // all cat name and % , child cat name and score /5
+              <span
+                key={item.id}
+                onClick={() => {
+                  // ✅ Allow click regardless of isAllMode to enable navigation from filtered view too
+                  const quadrantFilter =
+                    type === 'strength'
+                      ? 's'
+                      : type === 'weakness'
+                        ? 'w'
+                        : type === 'opportunity'
+                          ? 'o'
+                          : 't';
+                  const targetChildAssetId = isAllMode ? item.id : childAssetId;
 
-            // all cat name and % , child cat name and score /5
-            <span
-              key={item.id}
-              onClick={() => {
-                if (isAllMode) {
-                  const quadrantFilter = type === 'strength' ? 's' : type === 'weakness' ? 'w' : type === 'opportunity' ? 'o' : 't';
-                  const urlParams = new URLSearchParams({
-                    quadrant: quadrantFilter,
-                    childAssetId: item.id,
-                  });
-                  router.push(`/dynamicApps/${params.app}/swot-result/detail?${urlParams.toString()}`);
-                }
-              }}
-              className={`bg-[rgba(0,0,0,0.10)] ${isAllMode ? 'cursor-pointer group' : 'cursor-default'} text-white text-sm p-[10px] rounded-[10px] ${isAllMode ? 'relative overflow-hidden' : 'flex items-center'} font-semibold justify-between w-[49%] gap-2 border ${config.borderColor}`}
-            >
-              {isAllMode ? (
+                  if (targetChildAssetId) {
+                    const urlParams = new URLSearchParams({
+                      quadrant: quadrantFilter,
+                      childAssetId: targetChildAssetId,
+                    });
+                    router.push(
+                      `/dynamicApps/${params.app}/swot-result/detail?${urlParams.toString()}`,
+                    );
+                  }
+                }}
+                className={`bg-[rgba(0,0,0,0.10)] cursor-pointer group text-white text-sm p-[8px] md:p-[10px] rounded-[10px] relative overflow-hidden font-semibold justify-between w-full sm:w-[49%] lg:w-[49%] gap-2 border ${config.borderColor}`}
+              >
                 <>
                   {/* Default content - slides up on hover */}
-                  <span
-                    className="flex items-center justify-between w-full transition-transform duration-300 group-hover:-translate-y-[28px]"
-                  >
+                  <span className="flex items-center justify-between w-full transition-transform duration-300 group-hover:-translate-y-[28px]">
                     <span className="capitalize">{item.name}</span>
-                    {item.averageScore > 0 && <span>{`${Math.round(item.averageScore)}%`}</span>}
+                    {item.averageScore > 0 && (
+                      <span>
+                        {isAllMode ? `${Math.round(item.averageScore)}%` : `${item.averageScore}/5`}
+                      </span>
+                    )}
                   </span>
 
                   {/* Hover content - slides in from below */}
-                  <span
-                    className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-300 group-hover:translate-y-0 font-semibold"
-                  >
-                    VIEW MORE <GoArrowUpRight className='text-2xl ml-1' />
+                  <span className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-300 group-hover:translate-y-0 font-semibold">
+                    VIEW MORE <GoArrowUpRight className="text-2xl ml-1" />
                   </span>
                 </>
-              ) : (
-                <>
-                  <span className="capitalize">{item.name}</span>
-                  <span>{`${item.averageScore}/5`}</span>
-                </>
-              )}
-            </span>
-          ))
+              </span>
+            ))
         ) : (
           <p className="text-white/70 italic text-sm">No {type} identified</p>
         )}

@@ -373,8 +373,8 @@ export default function Dashboard() {
   const activeAppsMap = new Map(
     subscriptionData?.data
       ?.filter((sub: Subscription) => sub.Status === 'active')
-      .flatMap((sub: Subscription) => 
-        sub.Apps.map((app: SubscriptionApp) => [app.AppId.Name.toLowerCase(), app.AppId._id])
+      .flatMap((sub: Subscription) =>
+        sub.Apps.map((app: SubscriptionApp) => [app.AppId.Name.toLowerCase(), app.AppId._id]),
       ) || [],
   );
 
@@ -391,7 +391,7 @@ export default function Dashboard() {
   ].map(({ key, title }) => {
     const appId = activeAppsMap.get(key.toLowerCase());
     const displayKey = key.charAt(0).toUpperCase() + key.slice(1);
-    
+
     return {
       key,
       title,
@@ -404,12 +404,12 @@ export default function Dashboard() {
     };
   });
 
-  const handleCardClick = (card: typeof allCards[0]) => {
+  const handleCardClick = (card: (typeof allCards)[0]) => {
     if (!card.isActive || !card.appId) return;
 
     // Set assetId in Redux
     dispatch(setAssetId(card.appId));
-    
+
     // Navigate to module
     router.push(`/dynamicApps/${card.slug}`);
   };
@@ -417,7 +417,7 @@ export default function Dashboard() {
   if (isLoading) return <p>Loading dashboard...</p>;
 
   return (
-    <div>
+    <div className="pt-[80px] w-full px-6">
       <h2 className="text-lg font-semibold text-gray-500">Welcome</h2>
       <h1 className="text-3xl font-bold text-maroon-700 mb-6">Olivia Rhye</h1>
 
@@ -432,6 +432,7 @@ export default function Dashboard() {
               {allCards.slice(0, 2).map((card) => (
                 <div
                   key={card.key}
+                  onClick={() => handleCardClick(card)}
                   className={`
                     h-[120px] relative rounded-xl text-white p-4 flex flex-col justify-between overflow-hidden
                     ${card.bgColor}
@@ -470,6 +471,7 @@ export default function Dashboard() {
               {allCards.slice(2).map((card) => (
                 <div
                   key={card.key}
+                  onClick={() => handleCardClick(card)}
                   className={`
                     h-[120px] relative rounded-xl text-white p-4 flex flex-col justify-between overflow-hidden
                     ${card.bgColor}

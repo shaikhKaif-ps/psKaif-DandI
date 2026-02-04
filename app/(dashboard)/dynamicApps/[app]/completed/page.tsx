@@ -1,4 +1,3 @@
-
 // ================
 // ================ 06 Dec
 // ================
@@ -97,7 +96,7 @@ export default function CompletedPage() {
   const categoryAdvice = adviceData?.data?.CategoryScores || [];
 
   return (
-    <div className="w-full min-h-screen bg-white md:px-4 sm:px-8 py-6">
+    <div className="reslutofAsset w-full min-h-screen bg-white md:px-4 sm:px-8 py-6 pt-[90px]">
       {/* Tabs */}
       <div className="relative flex rounded-full border border-gray-300 bg-gray-100 p-1 mb-6 max-w-fit">
         <div

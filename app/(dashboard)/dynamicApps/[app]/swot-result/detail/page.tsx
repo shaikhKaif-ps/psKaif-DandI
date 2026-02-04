@@ -14,11 +14,10 @@
 //   // const childAssetId = useSelector((state: RootState) => state.global.childAssetId);
 //   const searchParams = useSearchParams();
 //   console.log(searchParams);
-  
+
 //   const quadrantFilter = searchParams.get('quadrant') || 'all';
 //   const urlChildAssetId = searchParams.get('childAssetId') || 'all';
 //   console.log(urlChildAssetId, '--------- childAssetId --------' );
-  
 
 //   const { data, isLoading } = useGetSwotTabularDataQuery(
 //     {
@@ -352,8 +351,6 @@
 //     },
 //   ];
 
-
-
 //   return (
 //     <div className="w-full min-h-screen bg-[#FAFBFC]">
 //       {/* HEADER */}
@@ -407,7 +404,6 @@
 //               </button>
 //             ))}
 //           </div>
-
 
 //           {/* CATEGORIES */}
 //           {categories.length === 0 ? (
@@ -498,14 +494,20 @@
 
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { useSearchParams, useRouter, useParams } from 'next/navigation';
+import { FaChevronDown, FaChevronUp, FaArrowLeft } from 'react-icons/fa';
 import { RootState } from '@/redux/store';
-import { useGetSwotTabularDataQuery, SwotTabularResult, SwotQuadrant } from '@/redux/slices/result/sowtResultSlice';
+import {
+  useGetSwotTabularDataQuery,
+  SwotTabularResult,
+  SwotQuadrant,
+} from '@/redux/slices/result/sowtResultSlice';
 
 export default function SwotPersonnelPage() {
   const router = useRouter();
+  const params = useParams();
   const searchParams = useSearchParams();
+  const [expanded, setExpanded] = useState(false);
 
   const assetId = useSelector((state: RootState) => state.global.assetId);
 
@@ -542,14 +544,18 @@ export default function SwotPersonnelPage() {
   const tabularData = categoriesData?.data?.results || [];
 
   // ✅ Find the selected childAsset for CATEGORIES from filtered data (tabularData)
-  const selectedChildAssetForCategories = urlChildAssetId === 'all'
-    ? tabularData[0] // Default to first if 'all'
-    : tabularData.find((item: SwotTabularResult) => item.childAssetId === urlChildAssetId) || null;
+  const selectedChildAssetForCategories =
+    urlChildAssetId === 'all'
+      ? tabularData[0] // Default to first if 'all'
+      : tabularData.find((item: SwotTabularResult) => item.childAssetId === urlChildAssetId) ||
+        null;
 
   // ✅ Find the selected childAsset for SWOT COUNT & HEADER from unfiltered data (allChildAssets)
-  const selectedChildAssetForSidebar = urlChildAssetId === 'all'
-    ? allChildAssets[0]
-    : allChildAssets.find((item: SwotTabularResult) => item.childAssetId === urlChildAssetId) || null;
+  const selectedChildAssetForSidebar =
+    urlChildAssetId === 'all'
+      ? allChildAssets[0]
+      : allChildAssets.find((item: SwotTabularResult) => item.childAssetId === urlChildAssetId) ||
+        null;
 
   const categories = selectedChildAssetForCategories?.categories || [];
 
@@ -562,7 +568,7 @@ export default function SwotPersonnelPage() {
       );
       setExpandedItems(initialExpanded);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlChildAssetId, quadrantFilter, categoriesLoading]);
 
   const toggleExpand = (id: string) => {
@@ -578,7 +584,6 @@ export default function SwotPersonnelPage() {
     });
   };
 
- 
   if (sidebarLoading || categoriesLoading) {
     return <div className="p-10 text-center">Loading...</div>;
   }
@@ -591,7 +596,6 @@ export default function SwotPersonnelPage() {
     t: 0,
   };
 
-  
   const scoreCards = [
     {
       key: 's',
@@ -619,12 +623,23 @@ export default function SwotPersonnelPage() {
     },
   ];
 
-
-
   return (
-    <div className="w-full min-h-screen bg-[#FAFBFC]">
+    <div className="w-full min-h-screen bg-[#FAFBFC] py-[90px] md:px-6 px-4 ">
       {/* HEADER */}
-      <h1 className="text-3xl font-bold text-[#5A0C0C] mb-8">
+      <h1 className="text-3xl font-bold text-[#5A0C0C] mb-8 flex items-center gap-3">
+        <button
+          onClick={() => {
+            const backParams = new URLSearchParams();
+            if (urlChildAssetId !== 'all') {
+              backParams.set('childAssetId', urlChildAssetId);
+            }
+            router.push(`/dynamicApps/${params.app}/swot-result?${backParams.toString()}`);
+          }}
+          className="hover:bg-gray-200 p-2 rounded-full transition-colors"
+          aria-label="Back to SWOT Result"
+        >
+          <FaArrowLeft className="text-2xl" />
+        </button>
         SWOT /{' '}
         <span className="font-normal">
           {selectedChildAssetForSidebar?.childAssetName ||
@@ -667,49 +682,182 @@ export default function SwotPersonnelPage() {
             <p className="text-gray-500">No data available</p>
           ) : (
             categories.map((category) => (
+              // <div
+              // onClick={() => toggleExpand(category.categoryId)}
+              // key={category.categoryId}
+              //   className="rounded-[10px] border border-[#EBEBEB] bg-white shadow-[4px_4px_14px_0_rgba(127,86,217,0.10)] mb-5 px-5 py-6 cursor-pointer"
+              // >
+              //   <button className="w-full flex justify-between items-center cursor-pointer">
+              //     <h3 className="text-xl font-semibold">{category.categoryName}</h3>
+              //     <div className="flex items-center gap-4">
+              //       <span className="text-xl font-semibold">{category.percentage}%</span>
+              //       {expandedItems[category.categoryId] ? <FaChevronUp /> : <FaChevronDown />}
+              //     </div>
+              //   </button>
+
+              //   <div
+              //     className={`grid transition-all duration-300 ease-in-out ${
+              //       expandedItems[category.categoryId]
+              //         ? 'grid-rows-[1fr] opacity-100 mt-4'
+              //         : 'grid-rows-[0fr] opacity-0 mt-0'
+              //     }`}
+              //   >
+              //     <div className="overflow-hidden">
+              //       <div className="w-full h-2 bg-gray-200 rounded-full my-4">
+              //         <div
+              //           className="h-2 bg-[#65B9A6] rounded-full"
+              //           style={{ width: `${category.percentage}%` }}
+              //         />
+              //       </div>
+
+              //       <div className="space-y-2 text-[16px]">
+              //         <p>
+              //           <strong>Team:</strong> {category.adviceMessage.team}
+              //         </p>
+              //         <p>
+              //           <strong>Team Leader:</strong> {category.adviceMessage.teamLeader}
+              //         </p>
+              //         <p>
+              //           <strong>Organization:</strong> {category.adviceMessage.organization}
+              //         </p>
+              //       </div>
+
+              //       <div className="flex flex-wrap gap-3 mt-9">
+              //         <button className="bg-[#5A0C0C] text-white px-4 py-3.5 rounded-md text-sm font-medium uppercase tracking-wide hover:bg-[#4a0909] transition-colors">
+              //           View Related Course
+              //         </button>
+
+              //         <button className="border border-gray-300 px-4 py-3.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              //           RE-ATTEMPT
+              //         </button>
+              //       </div>
+              //     </div>
+              //   </div>
+              // </div>
+              //==== new methods
               <div
-                onClick={() => toggleExpand(category.categoryId)}
                 key={category.categoryId}
-                className="rounded-[10px] border border-[#EBEBEB] bg-white shadow-[4px_4px_14px_0_rgba(127,86,217,0.10)] mb-5 px-5 py-6 cursor-pointer"
+                onClick={() => toggleExpand(category.categoryId)}
+                className="rounded-[10px] border border-[#EBEBEB] bg-white shadow-[4px_4px_14px_0_rgba(127,86,217,0.10)] mb-5 px-5 py-4 cursor-pointer"
               >
+                {/* Header */}
                 <button className="w-full flex justify-between items-center cursor-pointer">
-                  <h3 className="text-xl font-semibold">{category.categoryName}</h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-left">P1 — PRIORITY</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      From stated importance to governed reality
+                    </p>
+                  </div>
+
                   <div className="flex items-center gap-4">
-                    <span className="text-xl font-semibold">{category.percentage}%</span>
-                    {expandedItems[category.categoryId] ? <FaChevronUp /> : <FaChevronDown />}
+                    <span className="text-xl font-semibold">85%</span>
+                    {expanded ? <FaChevronUp /> : <FaChevronDown />}
                   </div>
                 </button>
 
+                {/* Expand Section */}
                 <div
                   className={`grid transition-all duration-300 ease-in-out ${
-                    expandedItems[category.categoryId]
-                      ? 'grid-rows-[1fr] opacity-100 mt-4'
-                      : 'grid-rows-[0fr] opacity-0 mt-0'
+                    expanded ? 'grid-rows-[1fr] opacity-100 mt-0' : 'grid-rows-[0fr] opacity-0 mt-0'
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="w-full h-2 bg-gray-200 rounded-full my-4">
-                      <div
-                        className="h-2 bg-[#65B9A6] rounded-full"
-                        style={{ width: `${category.percentage}%` }}
-                      />
+                    {/* Progress */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full my-6">
+                      <div className="h-2 bg-[#65B9A6] rounded-full w-[85%]" />
                     </div>
 
-                    <div className="space-y-2 text-[16px]">
+                    {/* Strength */}
+                    <span className="inline-block mb-4 px-3 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+                      🟢 Strength (Score 4.0–5.0)
+                    </span>
+
+                    {/* Content */}
+                    <div className="space-y-4 text-[16px]">
                       <p>
-                        <strong>Team:</strong> {category.adviceMessage.team}
+                        <strong>Diagnosis:</strong>
+                        <br />
+                        DEIT consistently guides strategic decisions, even under time pressure,
+                        commercial tension, or political resistance.
                       </p>
+
                       <p>
-                        <strong>Team Leader:</strong> {category.adviceMessage.teamLeader}
+                        <strong>Governance Meaning:</strong>
+                        <br />
+                        Priority functions as an active and reliable decision filter.
                       </p>
+
                       <p>
-                        <strong>Organization:</strong> {category.adviceMessage.organization}
+                        <strong>Typical Leadership Pattern:</strong>
+                        <br />
+                        Leaders protect direction under pressure and close choices explicitly.
                       </p>
+
+                      <p>
+                        <strong>Learning Need:</strong>
+                        <br />
+                        Sustaining direction during escalation.
+                      </p>
+
+                      {/* Interventions */}
+                      <div>
+                        <strong>Interventions:</strong>
+                        <ul className="list-disc pl-6 mt-2 space-y-1">
+                          <li>
+                            <strong>Team:</strong> Explicitly name decisions where DEIT was
+                            decisive.
+                          </li>
+                          <li>
+                            <strong>Team Leader:</strong> Link DEIT visibly to performance,
+                            investment, and people decisions.
+                          </li>
+                          <li>
+                            <strong>Organisation:</strong> Use DEIT as a formal criterion in
+                            strategic and executive reviews.
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* Related Governance Module */}
+                      <div>
+                        <strong>Related Governance Module:</strong>
+                        <p className="text-gray-600 mt-2 text-sm">
+                          How priorities become real through attention, allocation, and authority
+                        </p>
+
+                        <div className="mt-3 border border-gray-200 rounded-md overflow-hidden">
+                          {/* Header */}
+                          <div className="grid grid-cols-3 bg-gray-100 text-sm font-semibold">
+                            <div className="px-3 py-2 border-r border-gray-200">Module No.</div>
+                            <div className="px-3 py-2 border-r border-gray-200">Module Title</div>
+                            <div className="px-3 py-2">Module Link</div>
+                          </div>
+
+                          {/* Row */}
+                          <div className="grid grid-cols-3 text-sm hover:bg-gray-50">
+                            <div className="px-3 py-2 border-t border-r border-gray-200">
+                              Module 1
+                            </div>
+                            <div className="px-3 py-2 border-t border-r border-gray-200">
+                              Priority as Governance
+                            </div>
+                            <div className="px-3 py-2 border-t border-gray-200">
+                              <a
+                                href="#"
+                                className="text-[#5A0C0C] font-medium underline hover:opacity-80"
+                              >
+                                View Module
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
+                    {/* Actions */}
                     <div className="flex flex-wrap gap-3 mt-9">
                       <button className="bg-[#5A0C0C] text-white px-4 py-3.5 rounded-md text-sm font-medium uppercase tracking-wide hover:bg-[#4a0909] transition-colors">
-                        View Related Course
+                        View Governance Module
                       </button>
 
                       <button className="border border-gray-300 px-4 py-3.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
@@ -791,7 +939,6 @@ export default function SwotPersonnelPage() {
             );
           })}
         </aside>
-
       </div>
     </div>
   );

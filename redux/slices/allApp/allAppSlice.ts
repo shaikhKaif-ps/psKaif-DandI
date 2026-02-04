@@ -1,5 +1,6 @@
 // redux/slices/allApp/allAppSlice.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { getCookie } from '@/utils/cookies';
 
 // ✅ Asset type
 export interface Asset {
@@ -12,6 +13,7 @@ export interface Asset {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  purchased?: boolean;
 }
 
 // ✅ Response type
@@ -33,10 +35,13 @@ export const appAppApi = createApi({
   endpoints: (builder) => ({
     // ✅ Get Assets
     getAssets: builder.query<AssetsResponse, void>({
-      query: () => ({
-        url: '/assets/',
-        method: 'GET',
-      }),
+      query: () => {
+        const userId = getCookie('UserId');
+        return {
+          url: userId ? `/assets/?userId=${userId}` : '/assets/',
+          method: 'GET',
+        };
+      },
     }),
   }),
 });

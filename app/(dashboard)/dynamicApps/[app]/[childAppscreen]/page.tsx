@@ -359,16 +359,240 @@
 //   );
 // }
 //path - app\(dashboard)\dynamicApps\[app]\[childAppscreen]\page.tsx
+// // path - app/(dashboard)/dynamicApps/[app]/[childAppscreen]/page.tsx
+// 'use client';
+
+// import { useSelector, useDispatch } from 'react-redux';
+// import { RootState } from '@/redux/store';
+// import { useGetAssetWithChildrenQuery } from '@/redux/slices/assesment/assesmentSlice';
+// import {
+//   setChildAssetId,
+//   setCompletedChildren,
+// } from '@/redux/slices/global/globalSlice';
+// import StartCompo from '@/components/dynamicAppsComponents/StartCompo';
+// import { useState, useEffect, useMemo } from 'react';
+// import { useRouter } from 'next/navigation';
+// import { GoArrowUpRight } from 'react-icons/go';
+// import Image from 'next/image';
+
+// /* ---------------- TYPES ---------------- */
+
+// interface Child {
+//   _id: string;
+//   Name: string;
+//   Description?: string;
+//   isCompleted?: boolean;
+//   inProgress?: boolean;
+// }
+
+// /* ---------------- STATUS BADGE ---------------- */
+
+// const StatusBadge = ({ child }: { child: Child }) => {
+//   if (child.isCompleted) {
+//     return (
+//       <span className="absolute top-3 right-3 text-xs px-2 py-2 rounded-full bg-green-100 text-green-700 font-semibold">
+//         <Image src="/completed.svg" alt="Completed" width={20} height={20} />
+//       </span>
+//     );
+//   }
+
+//   if (child.inProgress) {
+//     return (
+//       <span className="absolute top-3 right-3 text-xs px-2 py-2 rounded-full bg-yellow-100 text-yellow-700 font-semibold">
+//         <Image src="/pending.svg" alt="Pending" width={20} height={20} />
+//       </span>
+//     );
+//   }
+
+//   return (
+//     <span className="absolute top-3 right-3 text-xs px-2 py-2 rounded-full bg-gray-100 text-gray-600 font-semibold">
+//       <Image src="/startnow.svg" alt="Start Now" width={20} height={20} />
+//     </span>
+//   );
+// };
+
+// /* ---------------- MAIN COMPONENT ---------------- */
+
+// export default function ChildAppPage() {
+//   const parentAssetId = useSelector(
+//     (state: RootState) => state.global.assetId
+//   );
+//   const dispatch = useDispatch();
+//   const router = useRouter();
+
+//   const { data, isLoading, error } =
+//     useGetAssetWithChildrenQuery(parentAssetId!, {
+//       skip: !parentAssetId,
+//     });
+
+//   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+
+//   const parentName = data?.data?.Name;
+
+//   const children: Child[] = useMemo(
+//     () => data?.data?.Children || [],
+//     [data?.data?.Children]
+//   );
+
+//   /* ---------------- SAVE COMPLETED MODULES ---------------- */
+
+//   useEffect(() => {
+//     if (children.length > 0) {
+//       const completed = children
+//         .filter((child) => child.isCompleted)
+//         .map((child) => ({
+//           _id: child._id,
+//           Name: child.Name,
+//           isCompleted: child.isCompleted!,
+//         }));
+
+//       dispatch(setCompletedChildren(completed));
+//     }
+//   }, [children, dispatch]);
+
+//   /* ---------------- HANDLERS ---------------- */
+
+//   const handleViewResult = (childId: string) => {
+//     dispatch(setChildAssetId(childId));
+//     router.push(`/dynamicApps/${parentAssetId}/swot-result`);
+//   };
+
+//   const getButtonConfig = (child: Child) => {
+//     if (child.isCompleted) {
+//       return {
+//         text: 'View Result',
+//         className: 'bg-green-600 hover:bg-green-700',
+//         onClick: () => handleViewResult(child._id),
+//       };
+//     }
+
+//     if (child.inProgress) {
+//       return {
+//         text: 'Continue',
+//         className: 'bg-yellow-500 hover:bg-yellow-600',
+//         onClick: () => setSelectedChildId(child._id),
+//       };
+//     }
+
+//     return {
+//       text: 'Start Now',
+//       className: 'bg-[#490000] hover:bg-red-800',
+//       onClick: () => setSelectedChildId(child._id),
+//     };
+//   };
+
+//   /* ---------------- LOADING & ERROR ---------------- */
+
+//   if (isLoading)
+//     return <div className="pt-24 text-center">Loading modules...</div>;
+
+//   if (error || !data?.data)
+//     return (
+//       <div className="pt-24 text-center text-red-600">
+//         Failed to load modules
+//       </div>
+//     );
+
+//   if (children.length === 0)
+//     return <div className="pt-24 text-center">No modules found.</div>;
+
+//   /* ---------------- RENDER ---------------- */
+
+//   return (
+//     <div className="bg-gray-50 min-h-screen pt-[90px]">
+//       <div className="max-w-6xl mx-auto px-4">
+//         {selectedChildId ? (
+//           <>
+//             <button
+//               onClick={() => setSelectedChildId(null)}
+//               className="mb-6 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+//             >
+//               ← Back to Modulesss
+//             </button>
+
+//             <StartCompo assetId={selectedChildId} />
+//           </>
+//         ) : (
+//           <>
+//             {/* HEADER */}
+//             <div className="text-center mb-6">
+//               <h1 className="text-5xl font-bold text-gray-900">{parentName}</h1>
+//               <p className="text-xl text-gray-600 mt-1">Select a category to begin or resume</p>
+//             </div>
+
+//             {/* STATUS LEGEND */}
+//             <div className="flex flex-col md:flex-row justify-center gap-2 md:gap-4 mb-8">
+//               <span className="flex items-center gap-2 px-3 py-1 rounded bg-green-100 text-green-700 text-lg border">
+//                 <Image src="/completed.svg" alt="Completed" width={20} height={20} /> Completed
+//               </span>
+//               <span className="flex items-center gap-2 px-3 py-1 rounded bg-yellow-100 text-yellow-700 text-lg border">
+//                 <Image src="/pending.svg" alt="Pending" width={20} height={20} /> In Progress
+//               </span>
+//               <span className="flex items-center gap-2 px-3 py-1 rounded bg-gray-100 text-gray-600 text-lg border">
+//                 <Image src="/startnow.svg" alt="Start Now" width={20} height={20} /> Not Started
+//               </span>
+//             </div>
+
+//             {/* GRID */}
+//             <div className="flex flex-wrap justify-center gap-9 max-w-5xl mx-auto">
+//               {children.map((child) => {
+//                 const btn = getButtonConfig(child);
+
+//                 return (
+//                   <div
+//                     key={child._id}
+//                     className="
+//                       relative bg-white rounded border border-gray-200 shadow-sm hover:shadow-md transition
+//                       w-full
+//                       h-38
+//                       md:w-[calc(50%-12px)]
+//                       lg:w-[calc(30.333%-16px)]
+//                     "
+//                   >
+//                     <StatusBadge child={child} />
+
+//                     <div className="py-6 px-4 text-center">
+//                       <h2 className="text-2xl font-bold text-gray-900">{child.Name}</h2>
+//                       <p className="text-gray-500 text-sm mt-1">
+//                         {child.Description || 'SWOT Analysis'}
+//                       </p>
+//                     </div>
+
+//                     <button
+//                       onClick={btn.onClick}
+//                       className={`cursor-pointer relative overflow-hidden group w-full h-[54px] rounded-b-xl text-white font-semibold ${btn.className}`}
+//                     >
+//                       {/* Default */}
+//                       <span className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:-translate-y-full uppercase">
+//                         {btn.text}
+//                       </span>
+
+//                       {/* Hover */}
+//                       <span className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-300 group-hover:translate-y-0 uppercase">
+//                         {btn.text} <GoArrowUpRight className="text-2xl ml-1" />
+//                       </span>
+//                     </button>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           </>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+// =================
+// =================
+// =================
+// =================
 // path - app/(dashboard)/dynamicApps/[app]/[childAppscreen]/page.tsx
 'use client';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { useGetAssetWithChildrenQuery } from '@/redux/slices/assesment/assesmentSlice';
-import {
-  setChildAssetId,
-  setCompletedChildren,
-} from '@/redux/slices/global/globalSlice';
+import { setChildAssetId, setCompletedChildren } from '@/redux/slices/global/globalSlice';
 import StartCompo from '@/components/dynamicAppsComponents/StartCompo';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -406,7 +630,7 @@ const StatusBadge = ({ child }: { child: Child }) => {
 
   return (
     <span className="absolute top-3 right-3 text-xs px-2 py-2 rounded-full bg-gray-100 text-gray-600 font-semibold">
-      <Image src="/startnow.svg" alt="Start Now" width={20} height={20} /> 
+      <Image src="/startnow.svg" alt="Start Now" width={20} height={20} />
     </span>
   );
 };
@@ -414,25 +638,19 @@ const StatusBadge = ({ child }: { child: Child }) => {
 /* ---------------- MAIN COMPONENT ---------------- */
 
 export default function ChildAppPage() {
-  const parentAssetId = useSelector(
-    (state: RootState) => state.global.assetId
-  );
+  const parentAssetId = useSelector((state: RootState) => state.global.assetId);
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { data, isLoading, error } =
-    useGetAssetWithChildrenQuery(parentAssetId!, {
-      skip: !parentAssetId,
-    });
+  const { data, isLoading, error } = useGetAssetWithChildrenQuery(parentAssetId!, {
+    skip: !parentAssetId,
+  });
 
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
   const parentName = data?.data?.Name;
 
-  const children: Child[] = useMemo(
-    () => data?.data?.Children || [],
-    [data?.data?.Children]
-  );
+  const children: Child[] = useMemo(() => data?.data?.Children || [], [data?.data?.Children]);
 
   /* ---------------- SAVE COMPLETED MODULES ---------------- */
 
@@ -483,31 +701,25 @@ export default function ChildAppPage() {
 
   /* ---------------- LOADING & ERROR ---------------- */
 
-  if (isLoading)
-    return <div className="pt-24 text-center">Loading modules...</div>;
+  if (isLoading) return <div className="pt-24 text-center">Loading modules...</div>;
 
   if (error || !data?.data)
-    return (
-      <div className="pt-24 text-center text-red-600">
-        Failed to load modules
-      </div>
-    );
+    return <div className="pt-24 text-center text-red-600">Failed to load modules</div>;
 
-  if (children.length === 0)
-    return <div className="pt-24 text-center">No modules found.</div>;
+  if (children.length === 0) return <div className="pt-24 text-center">No modules found.</div>;
 
   /* ---------------- RENDER ---------------- */
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="bg-gray-50 min-h-screen pt-[90px]">
+      <div className="max-w-6xl mx-auto px-4 pb-[40px]">
         {selectedChildId ? (
           <>
             <button
               onClick={() => setSelectedChildId(null)}
               className="mb-6 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
             >
-              ← Back to Modules
+              ← Back to Modulesss
             </button>
 
             <StartCompo assetId={selectedChildId} />
@@ -521,7 +733,7 @@ export default function ChildAppPage() {
             </div>
 
             {/* STATUS LEGEND */}
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex flex-col md:flex-row justify-center gap-2 md:gap-4 mb-8">
               <span className="flex items-center gap-2 px-3 py-1 rounded bg-green-100 text-green-700 text-lg border">
                 <Image src="/completed.svg" alt="Completed" width={20} height={20} /> Completed
               </span>

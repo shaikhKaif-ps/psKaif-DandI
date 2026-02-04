@@ -83,7 +83,7 @@
 // =========================
 // =========================
 // =========================
-// app / dashboard / layout.tsx;
+// path app / (dashboard) / layout.tsx;
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -157,13 +157,15 @@ export default function DashboardLayout({ children }: LayoutProps) {
       <Sidebar isExpanded={isSidebarExpanded} isDesktop={isDesktop} toggleSidebar={toggleSidebar} />
 
       <div
-        className="relative transition-all duration-300 h-[calc(100vh-67px)] md:h-[calc(100vh-80px)]"
+        className="relative transition-all  duration-300 h-[calc(100vh-67px)] md:h-[calc(100vh-80px)]"
         style={{ marginLeft }}
       >
-        <div className="mb-[68px]">
+        <div className="">
           <PageHeading isDesktop={isDesktop} toggleSidebar={toggleSidebar} />
         </div>
-        <main className="p-4 md:p-6  ">{children}</main>
+        <main className="p-0 md:px-0  min-h-screen flex justify-center items-center">
+          {children}
+        </main>
       </div>
     </div>
   );
